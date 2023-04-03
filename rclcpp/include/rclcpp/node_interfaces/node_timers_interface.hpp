@@ -21,28 +21,34 @@
 #include "rclcpp/timer.hpp"
 #include "rclcpp/visibility_control.hpp"
 
-namespace rclcpp
-{
-namespace node_interfaces
-{
+namespace rclcpp {
+namespace node_interfaces {
 
+/// 纯虚拟接口类，用于 Node API 的 NodeTimers 部分。
 /// Pure virtual interface class for the NodeTimers part of the Node API.
-class NodeTimersInterface
-{
+class NodeTimersInterface {
 public:
+  // 只使用智能指针别名
+  // Use smart pointer aliases only
   RCLCPP_SMART_PTR_ALIASES_ONLY(NodeTimersInterface)
 
+  // 公共虚析构函数
+  // Public virtual destructor
   RCLCPP_PUBLIC
-  virtual
-  ~NodeTimersInterface() = default;
+  virtual ~NodeTimersInterface() = default;
 
+  /// 向节点添加定时器。
   /// Add a timer to the node.
+  /**
+   * \param[in] timer 定时器的共享指针。
+   * \param[in] callback_group 回调组的共享指针。
+   *
+   * \param[in] timer Shared pointer of the timer.
+   * \param[in] callback_group Shared pointer of the callback group.
+   */
   RCLCPP_PUBLIC
-  virtual
-  void
-  add_timer(
-    rclcpp::TimerBase::SharedPtr timer,
-    rclcpp::CallbackGroup::SharedPtr callback_group) = 0;
+  virtual void add_timer(
+      rclcpp::TimerBase::SharedPtr timer, rclcpp::CallbackGroup::SharedPtr callback_group) = 0;
 };
 
 }  // namespace node_interfaces

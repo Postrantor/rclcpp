@@ -13,37 +13,57 @@
 // limitations under the License.
 
 #include <memory>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/utilities.hpp"
 #include "rclcpp_components/component_manager_isolated.hpp"
 
-int main(int argc, char * argv[])
-{
-  /// Component container with dedicated single-threaded executors for each components.
+/**
+ * @brief 主函数，用于初始化 ROS2 节点和执行器，并根据参数选择是否使用多线程执行器。
+ *        Main function, used to initialize ROS2 node and executor, and select whether to use
+ * multi-threaded executor based on arguments.
+ *
+ * @param argc 命令行参数个数。Number of command line arguments.
+ * @param argv 命令行参数。Command line arguments.
+ * @return int 返回值。Return value.
+ */
+int main(int argc, char* argv[]) {
+  // 初始化 ROS2。Initialize ROS2.
   rclcpp::init(argc, argv);
-  // parse arguments
+
+  // 解析命令行参数。Parse command line arguments.
   bool use_multi_threaded_executor{false};
   std::vector<std::string> args = rclcpp::remove_ros_arguments(argc, argv);
-  for (auto & arg : args) {
+
+  // 遍历参数，查找是否指定了使用多线程执行器。Iterate through arguments to find if the
+  // multi-threaded executor is specified.
+  for (auto& arg : args) {
     if (arg == std::string("--use_multi_threaded_executor")) {
       use_multi_threaded_executor = true;
     }
   }
-  // create executor and component manager
+
+  // 创建执行器和组件管理器。Create executor and component manager.
   auto exec = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
   rclcpp::Node::SharedPtr node;
+
+  // 根据参数选择是否使用多线程执行器。Select whether to use multi-threaded executor based on
+  // arguments.
   if (use_multi_threaded_executor) {
     using ComponentManagerIsolated =
-      rclcpp_components::ComponentManagerIsolated<rclcpp::executors::MultiThreadedExecutor>;
+        rclcpp_components::ComponentManagerIsolated<rclcpp::executors::MultiThreadedExecutor>;
     node = std::make_shared<ComponentManagerIsolated>(exec);
   } else {
     using ComponentManagerIsolated =
-      rclcpp_components::ComponentManagerIsolated<rclcpp::executors::SingleThreadedExecutor>;
+        rclcpp_components::ComponentManagerIsolated<rclcpp::executors::SingleThreadedExecutor>;
     node = std::make_shared<ComponentManagerIsolated>(exec);
   }
+
+  // 将节点添加到执行器。Add the node to the executor.
   exec->add_node(node);
+
+  // 执行器开始执行。Start spinning the executor.
   exec->spin();
 }

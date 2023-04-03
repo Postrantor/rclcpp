@@ -21,48 +21,62 @@
 #include "rclcpp/macros.hpp"
 #include "rclcpp/visibility_control.hpp"
 
-namespace rclcpp
-{
+namespace rclcpp {
 
-class Event
-{
+/**
+ * @class Event
+ * @brief 事件类，用于表示一个简单的二值状态（true/false）。
+ *        Event class, representing a simple binary state (true/false).
+ */
+class Event {
 public:
+  /// 定义智能指针类型，禁止拷贝
+  /// Define smart pointer types and disable copy
   RCLCPP_SMART_PTR_DEFINITIONS_NOT_COPYABLE(Event)
 
-  /// Default construct
+  /// 默认构造函数
+  /// Default constructor
   /**
+   * 将默认值设置为 false
    * Set the default value to false
    */
   RCLCPP_PUBLIC
   Event();
 
+  /// 将事件状态值设置为 true
   /// Set the Event state value to true
   /**
+   * \return 调用前的状态值。
    * \return The state value before the call.
    */
   RCLCPP_PUBLIC
-  bool
-  set();
+  bool set();
 
+  /// 获取事件的状态值
   /// Get the state value of the Event
   /**
+   * \return 事件状态值
    * \return the Event state value
    */
   RCLCPP_PUBLIC
-  bool
-  check();
+  bool check();
 
+  /// 获取事件的状态值并设置为 false
   /// Get the state value of the Event and set to false
   /**
+   * \return 事件状态值
    * \return the Event state value
    */
   RCLCPP_PUBLIC
-  bool
-  check_and_clear();
+  bool check_and_clear();
 
 private:
+  /// 禁止拷贝
+  /// Disable copy
   RCLCPP_DISABLE_COPY(Event)
 
+  /// 原子布尔型状态变量
+  /// Atomic boolean state variable
   std::atomic_bool state_;
 };
 

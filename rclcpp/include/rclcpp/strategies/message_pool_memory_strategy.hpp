@@ -17,76 +17,78 @@
 
 #include <memory>
 
-#include "rosidl_runtime_cpp/traits.hpp"
-
 #include "rclcpp/macros.hpp"
 #include "rclcpp/message_memory_strategy.hpp"
 #include "rclcpp/visibility_control.hpp"
+#include "rosidl_runtime_cpp/traits.hpp"
 
-namespace rclcpp
-{
-namespace strategies
-{
-namespace message_pool_memory_strategy
-{
+namespace rclcpp {
+namespace strategies {
+namespace message_pool_memory_strategy {
 
+/// 完全静态内存分配策略的消息。
 /// Completely static memory allocation strategy for messages.
 /**
+ * 本类池化的消息类型和消息池大小进行模板化。
  * Templated on the type of message pooled by this class and the size of the message pool.
+ * 模板允许程序在编译时确定此对象所需的内存。
  * Templating allows the program to determine the memory required for this object at compile time.
+ * 消息池的大小应至少为对订阅的并发访问次数（通常为线程数）。
  * The size of the message pool should be at least the largest number of concurrent accesses to
  * the subscription (usually the number of threads).
  */
-template<
-  typename MessageT,
-  size_t Size,
-  typename std::enable_if<
-    rosidl_generator_traits::has_fixed_size<MessageT>::value
-  >::type * = nullptr
->
-class MessagePoolMemoryStrategy
-  : public message_memory_strategy::MessageMemoryStrategy<MessageT>
-{
+template <
+    typename MessageT,
+    size_t Size,
+    typename std::enable_if<rosidl_generator_traits::has_fixed_size<MessageT>::value>::type* =
+        nullptr>
+class MessagePoolMemoryStrategy : public message_memory_strategy::MessageMemoryStrategy<MessageT> {
 public:
   RCLCPP_SMART_PTR_DEFINITIONS(MessagePoolMemoryStrategy)
 
+  /// 默认构造函数
   /// Default constructor
-  MessagePoolMemoryStrategy()
-  : next_array_index_(0)
-  {
+  MessagePoolMemoryStrategy() : next_array_index_(0) {
+    // 初始化消息池
+    // Initialize the message pool
     for (size_t i = 0; i < Size; ++i) {
       pool_[i].msg_ptr_ = std::make_shared<MessageT>();
       pool_[i].used = false;
     }
   }
 
+  /// 从消息池中借用一条消息。
   /// Borrow a message from the message pool.
   /**
+   * 管理消息池环形缓冲区。
    * Manage the message pool ring buffer.
+   * 如果下一条消息不可用，则抛出异常。
    * Throw an exception if the next message was not available.
+   * \return 借用的消息的共享指针。
    * \return Shared pointer to the borrowed message.
    */
-  std::shared_ptr<MessageT> borrow_message()
-  {
+  std::shared_ptr<MessageT> borrow_message() {
     size_t current_index = next_array_index_;
     next_array_index_ = (next_array_index_ + 1) % Size;
     if (pool_[current_index].used) {
       throw std::runtime_error("Tried to access message that was still in use! Abort.");
     }
     pool_[current_index].msg_ptr_->~MessageT();
-    new (pool_[current_index].msg_ptr_.get())MessageT;
+    new (pool_[current_index].msg_ptr_.get()) MessageT;
 
     pool_[current_index].used = true;
     return pool_[current_index].msg_ptr_;
   }
 
+  /// 将消息返回到消息池。
   /// Return a message to the message pool.
   /**
+   * 管理消息池环形缓冲区中的元数据以释放消息。
    * Manage metadata in the message pool ring buffer to release the message.
+   * \param[in] msg 要返回的消息的共享指针。
    * \param[in] msg Shared pointer to the message to return.
    */
-  void return_message(std::shared_ptr<MessageT> & msg)
-  {
+  void return_message(std::shared_ptr<MessageT>& msg) {
     for (size_t i = 0; i < Size; ++i) {
       if (pool_[i].msg_ptr_ == msg) {
         pool_[i].used = false;
@@ -97,12 +99,15 @@ public:
   }
 
 protected:
-  struct PoolMember
-  {
+  // 池成员结构
+  // Pool member structure
+  struct PoolMember {
     std::shared_ptr<MessageT> msg_ptr_;
     bool used;
   };
 
+  // 消息池数组
+  // Message pool array
   std::array<PoolMember, Size> pool_;
   size_t next_array_index_;
 };

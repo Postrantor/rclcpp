@@ -22,35 +22,45 @@
 #include "rclcpp/timer.hpp"
 #include "rclcpp/visibility_control.hpp"
 
-namespace rclcpp
-{
-namespace node_interfaces
-{
+namespace rclcpp {
+namespace node_interfaces {
 
-/// Implementation of the NodeTimers part of the Node API.
-class NodeTimers : public NodeTimersInterface
-{
+/// \file node_timers.hpp
+/// \brief 实现 NodeTimers 类，作为 Node API 的一部分 (Implementation of the NodeTimers class, part
+/// of the Node API)
+
+/// NodeTimers 类实现 (NodeTimers class implementation)
+class NodeTimers : public NodeTimersInterface {
 public:
+  // 只允许智能指针别名 (Allow smart pointer aliases only)
   RCLCPP_SMART_PTR_ALIASES_ONLY(NodeTimers)
 
+  /// 构造函数 (Constructor)
+  /**
+   * \param[in] node_base 节点基类指针 (Pointer to the node base class)
+   */
   RCLCPP_PUBLIC
-  explicit NodeTimers(rclcpp::node_interfaces::NodeBaseInterface * node_base);
+  explicit NodeTimers(rclcpp::node_interfaces::NodeBaseInterface* node_base);
 
+  /// 析构函数 (Destructor)
   RCLCPP_PUBLIC
-  virtual
-  ~NodeTimers();
+  virtual ~NodeTimers();
 
-  /// Add a timer to the node.
+  /// 向节点添加定时器 (Add a timer to the node)
+  /**
+   * \param[in] timer 定时器的共享指针 (Shared pointer to the timer)
+   * \param[in] callback_group 回调组的共享指针 (Shared pointer to the callback group)
+   */
   RCLCPP_PUBLIC
-  void
-  add_timer(
-    rclcpp::TimerBase::SharedPtr timer,
-    rclcpp::CallbackGroup::SharedPtr callback_group) override;
+  void add_timer(
+      rclcpp::TimerBase::SharedPtr timer, rclcpp::CallbackGroup::SharedPtr callback_group) override;
 
 private:
+  // 禁用拷贝构造函数和赋值操作符 (Disable copy constructor and assignment operator)
   RCLCPP_DISABLE_COPY(NodeTimers)
 
-  rclcpp::node_interfaces::NodeBaseInterface * node_base_;
+  // 节点基类指针 (Pointer to the node base class)
+  rclcpp::node_interfaces::NodeBaseInterface* node_base_;
 };
 
 }  // namespace node_interfaces

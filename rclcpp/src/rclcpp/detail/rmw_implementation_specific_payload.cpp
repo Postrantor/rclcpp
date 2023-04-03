@@ -14,20 +14,31 @@
 
 #include <rclcpp/detail/rmw_implementation_specific_payload.hpp>
 
-namespace rclcpp
-{
-namespace detail
-{
+namespace rclcpp {
+namespace detail {
 
-bool
-RMWImplementationSpecificPayload::has_been_customized() const
-{
+/**
+ * @brief 检查 RMWImplementationSpecificPayload 是否已经被定制 (Check if the
+ * RMWImplementationSpecificPayload has been customized)
+ *
+ * @return 如果已定制，返回 true；否则返回 false (Return true if it's customized, otherwise return
+ * false)
+ */
+bool RMWImplementationSpecificPayload::has_been_customized() const {
+  // 调用 get_implementation_identifier() 函数，检查返回值是否为 nullptr
+  // (Call the get_implementation_identifier() function and check if the returned value is nullptr)
   return nullptr != this->get_implementation_identifier();
 }
 
-const char *
-RMWImplementationSpecificPayload::get_implementation_identifier() const
-{
+/**
+ * @brief 获取实现标识符 (Get the implementation identifier)
+ *
+ * @return 返回实现标识符，这里返回 nullptr 表示没有实现 (Return the implementation identifier, here
+ * returning nullptr means no implementation)
+ */
+const char* RMWImplementationSpecificPayload::get_implementation_identifier() const {
+  // 返回 nullptr，表示没有实现标识符
+  // (Return nullptr, indicating that there is no implementation identifier)
   return nullptr;
 }
 

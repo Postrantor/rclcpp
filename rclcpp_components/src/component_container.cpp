@@ -15,15 +15,30 @@
 #include <memory>
 
 #include "rclcpp/rclcpp.hpp"
-
 #include "rclcpp_components/component_manager.hpp"
 
-int main(int argc, char * argv[])
-{
-  /// Component container with a single-threaded executor.
+/**
+ * @file main.cpp
+ *
+ * @brief 主函数，用于初始化 ROS2 节点并运行组件容器 (Main function to initialize the ROS2 node and
+ * run the component container)
+ */
+int main(int argc, char* argv[]) {
+  // 初始化 ROS2 (Initialize ROS2)
   rclcpp::init(argc, argv);
+
+  // 创建单线程执行器 (Create a single-threaded executor)
   auto exec = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
+
+  // 创建组件管理器节点，将执行器作为参数传递 (Create a ComponentManager node, passing the executor
+  // as an argument)
   auto node = std::make_shared<rclcpp_components::ComponentManager>(exec);
+
+  // 将组件管理器节点添加到执行器中 (Add the ComponentManager node to the executor)
   exec->add_node(node);
+
+  // 执行器开始执行 (Start spinning the executor)
   exec->spin();
+
+  return 0;
 }

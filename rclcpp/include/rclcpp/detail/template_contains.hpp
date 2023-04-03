@@ -17,27 +17,34 @@
 
 #include <type_traits>
 
-namespace rclcpp
-{
-namespace detail
-{
+namespace rclcpp {
+namespace detail {
 
+/// \brief 模板元函数，用于检查给定的 T 是否包含在列表 Us 中。
 /// Template meta-function that checks if a given T is contained in the list Us.
-template<typename T, typename ... Us>
+template <typename T, typename... Us>
 struct template_contains;
 
-template<typename ... Args>
-inline constexpr bool template_contains_v = template_contains<Args ...>::value;
+/// \brief 内联常量表达式，用于获取模板元函数 template_contains 的值。
+/// Inline constexpr to get the value of the template meta-function template_contains.
+template <typename... Args>
+inline constexpr bool template_contains_v = template_contains<Args...>::value;
 
-template<typename T, typename NextT, typename ... Us>
-struct template_contains<T, NextT, Us ...>
-{
-  enum { value = (std::is_same_v<T, NextT>|| template_contains_v<T, Us ...>)};
+/// \brief 模板偏特化，用于递归地检查 T 是否等于 NextT 或者包含在 Us 中。
+/// Template specialization for recursively checking if T is equal to NextT or contained in Us.
+template <typename T, typename NextT, typename... Us>
+struct template_contains<T, NextT, Us...> {
+  // 判断 T 是否等于 NextT 或者包含在 Us 中。
+  // Check if T is equal to NextT or contained in Us.
+  enum { value = (std::is_same_v<T, NextT> || template_contains_v<T, Us...>)};
 };
 
-template<typename T>
-struct template_contains<T>
-{
+/// \brief 模板偏特化，用于处理 T 不包含在任何类型中的情况。
+/// Template specialization for handling the case when T is not contained in any type.
+template <typename T>
+struct template_contains<T> {
+  // 当 T 不包含在任何类型中时，值为 false。
+  // Value is false when T is not contained in any type.
   enum { value = false };
 };
 

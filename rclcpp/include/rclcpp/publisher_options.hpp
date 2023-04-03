@@ -21,7 +21,6 @@
 #include <vector>
 
 #include "rcl/publisher.h"
-
 #include "rclcpp/allocator/allocator_common.hpp"
 #include "rclcpp/detail/rmw_implementation_specific_publisher_payload.hpp"
 #include "rclcpp/intra_process_setting.hpp"
@@ -29,68 +28,56 @@
 #include "rclcpp/qos_event.hpp"
 #include "rclcpp/qos_overriding_options.hpp"
 
-namespace rclcpp
-{
+namespace rclcpp {
 
 class CallbackGroup;
 
-/// Non-templated part of PublisherOptionsWithAllocator<Allocator>.
-struct PublisherOptionsBase
-{
-  /// Setting to explicitly set intraprocess communications.
+/// 非模板部分的 PublisherOptionsWithAllocator<Allocator>。
+struct PublisherOptionsBase {
+  /// 设置显式设置内部进程通信。
   IntraProcessSetting use_intra_process_comm = IntraProcessSetting::NodeDefault;
-
-  /// Callbacks for various events related to publishers.
+  /// 与发布者相关的各种事件的回调。
   PublisherEventCallbacks event_callbacks;
-
-  /// Whether or not to use default callbacks when user doesn't supply any in event_callbacks
+  /// 当用户在 event_callbacks 中不提供任何回调时，是否使用默认回调。
   bool use_default_callbacks = true;
-
-  /// Require middleware to generate unique network flow endpoints
-  /// Disabled by default
+  /// 要求中间件生成独特的网络流端点。
+  /// 默认禁用。
   rmw_unique_network_flow_endpoints_requirement_t require_unique_network_flow_endpoints =
-    RMW_UNIQUE_NETWORK_FLOW_ENDPOINTS_NOT_REQUIRED;
-
-  /// Callback group in which the waitable items from the publisher should be placed.
+      RMW_UNIQUE_NETWORK_FLOW_ENDPOINTS_NOT_REQUIRED;
+  /// 发布者的 waitable 项应放置在其中的回调组。
   std::shared_ptr<rclcpp::CallbackGroup> callback_group;
-
-  /// Optional RMW implementation specific payload to be used during creation of the publisher.
+  /// 在创建发布者期间使用的可选 RMW 实现特定有效载荷。
   std::shared_ptr<rclcpp::detail::RMWImplementationSpecificPublisherPayload>
-  rmw_implementation_payload = nullptr;
-
+      rmw_implementation_payload = nullptr;
   QosOverridingOptions qos_overriding_options;
 };
 
-/// Structure containing optional configuration for Publishers.
-template<typename Allocator>
-struct PublisherOptionsWithAllocator : public PublisherOptionsBase
-{
+/// 包含发布者可选配置的结构。
+template <typename Allocator>
+struct PublisherOptionsWithAllocator : public PublisherOptionsBase {
   static_assert(
-    std::is_void_v<typename std::allocator_traits<Allocator>::value_type>,
-    "Publisher allocator value type must be void");
+      std::is_void_v<typename std::allocator_traits<Allocator>::value_type>,
+      "Publisher allocator value type must be void");
 
-  /// Optional custom allocator.
+  /// 可选的自定义分配器。
   std::shared_ptr<Allocator> allocator = nullptr;
 
   PublisherOptionsWithAllocator() {}
 
-  /// Constructor using base class as input.
-  explicit PublisherOptionsWithAllocator(const PublisherOptionsBase & publisher_options_base)
-  : PublisherOptionsBase(publisher_options_base)
-  {}
+  /// 使用基类作为输入的构造函数。
+  explicit PublisherOptionsWithAllocator(const PublisherOptionsBase& publisher_options_base)
+      : PublisherOptionsBase(publisher_options_base) {}
 
-  /// Convert this class, and a rclcpp::QoS, into an rcl_publisher_options_t.
-  template<typename MessageT>
-  rcl_publisher_options_t
-  to_rcl_publisher_options(const rclcpp::QoS & qos) const
-  {
+  /// 将此类和 rclcpp::QoS 转换为 rcl_publisher_options_t。
+  template <typename MessageT>
+  rcl_publisher_options_t to_rcl_publisher_options(const rclcpp::QoS& qos) const {
     rcl_publisher_options_t result = rcl_publisher_get_default_options();
     result.allocator = this->get_rcl_allocator();
     result.qos = qos.get_rmw_qos_profile();
     result.rmw_publisher_options.require_unique_network_flow_endpoints =
-      this->require_unique_network_flow_endpoints;
+        this->require_unique_network_flow_endpoints;
 
-    // Apply payload to rcl_publisher_options if necessary.
+    // 如果需要，将有效负载应用于 rcl_publisher_options。
     if (rmw_implementation_payload && rmw_implementation_payload->has_been_customized()) {
       rmw_implementation_payload->modify_rmw_publisher_options(result.rmw_publisher_options);
     }
@@ -98,11 +85,8 @@ struct PublisherOptionsWithAllocator : public PublisherOptionsBase
     return result;
   }
 
-
-  /// Get the allocator, creating one if needed.
-  std::shared_ptr<Allocator>
-  get_allocator() const
-  {
+  /// 获取分配器，如果需要创建一个。
+  std::shared_ptr<Allocator> get_allocator() const {
     if (!this->allocator) {
       if (!allocator_storage_) {
         allocator_storage_ = std::make_shared<Allocator>();
@@ -113,25 +97,21 @@ struct PublisherOptionsWithAllocator : public PublisherOptionsBase
   }
 
 private:
-  using PlainAllocator =
-    typename std::allocator_traits<Allocator>::template rebind_alloc<char>;
+  using PlainAllocator = typename std::allocator_traits<Allocator>::template rebind_alloc<char>;
 
-  rcl_allocator_t
-  get_rcl_allocator() const
-  {
+  rcl_allocator_t get_rcl_allocator() const {
     if (!plain_allocator_storage_) {
-      plain_allocator_storage_ =
-        std::make_shared<PlainAllocator>(*this->get_allocator());
+      plain_allocator_storage_ = std::make_shared<PlainAllocator>(*this->get_allocator());
     }
     return rclcpp::allocator::get_rcl_allocator<char>(*plain_allocator_storage_);
   }
 
-  // This is a temporal workaround, to make sure that get_allocator()
-  // always returns a copy of the same allocator.
+  // 这是一个临时解决方案，确保 get_allocator()
+  // 始终返回相同分配器的副本。
   mutable std::shared_ptr<Allocator> allocator_storage_;
 
-  // This is a temporal workaround, to keep the plain allocator that backs
-  // up the rcl allocator returned in rcl_publisher_options_t alive.
+  // 这是一个临时解决方案，以保持支持
+  // 在 rcl_publisher_options_t 中返回的 rcl 分配器的纯分配器活跃。
   mutable std::shared_ptr<PlainAllocator> plain_allocator_storage_;
 };
 

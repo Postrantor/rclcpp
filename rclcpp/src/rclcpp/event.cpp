@@ -14,28 +14,33 @@
 
 #include "rclcpp/event.hpp"
 
-namespace rclcpp
-{
+namespace rclcpp {
 
-Event::Event()
-: state_(false) {}
+/**
+ * @brief 事件类的构造函数，初始化事件状态为 false（未设置）。
+ * @details Event class constructor, initializes the event state to false (unset).
+ */
+Event::Event() : state_(false) {}
 
-bool
-Event::set()
-{
-  return state_.exchange(true);
-}
+/**
+ * @brief 设置事件状态为 true（已设置）。
+ * @details Set the event state to true (set).
+ * @return 返回之前的事件状态。Returns the previous event state.
+ */
+bool Event::set() { return state_.exchange(true); }
 
-bool
-Event::check()
-{
-  return state_.load();
-}
+/**
+ * @brief 检查事件状态。
+ * @details Check the event state.
+ * @return 返回当前的事件状态。Returns the current event state.
+ */
+bool Event::check() { return state_.load(); }
 
-bool
-Event::check_and_clear()
-{
-  return state_.exchange(false);
-}
+/**
+ * @brief 检查并清除（重置）事件状态。
+ * @details Check and clear (reset) the event state.
+ * @return 返回之前的事件状态。Returns the previous event state.
+ */
+bool Event::check_and_clear() { return state_.exchange(false); }
 
 }  // namespace rclcpp

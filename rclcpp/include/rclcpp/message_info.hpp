@@ -15,38 +15,40 @@
 #ifndef RCLCPP__MESSAGE_INFO_HPP_
 #define RCLCPP__MESSAGE_INFO_HPP_
 
+#include "rclcpp/visibility_control.hpp"
 #include "rmw/types.h"
 
-#include "rclcpp/visibility_control.hpp"
+namespace rclcpp {
 
-namespace rclcpp
-{
-
-/// Additional meta data about messages taken from subscriptions.
-class RCLCPP_PUBLIC MessageInfo
-{
+/// \class MessageInfo
+/// \brief 附加的订阅消息的元数据信息。 (Additional meta data about messages taken from
+/// subscriptions.)
+class RCLCPP_PUBLIC MessageInfo {
 public:
-  /// Default empty constructor.
+  /// 默认空构造函数。 (Default empty constructor.)
   MessageInfo() = default;
 
-  /// Conversion constructor, which is intentionally not marked as explicit.
+  /// 转换构造函数，故意不标记为 explicit。 (Conversion constructor, which is intentionally not
+  /// marked as explicit.)
   /**
-   * \param[in] rmw_message_info message info to initialize the class
+   * \param[in] rmw_message_info 用于初始化类的消息信息 (message info to initialize the class)
    */
   // cppcheck-suppress noExplicitConstructor
-  MessageInfo(const rmw_message_info_t & rmw_message_info);  // NOLINT(runtime/explicit)
+  MessageInfo(const rmw_message_info_t& rmw_message_info);  // NOLINT(runtime/explicit)
 
+  /// 虚析构函数。 (Virtual destructor.)
   virtual ~MessageInfo();
 
-  /// Return the message info as the underlying rmw message info type.
-  const rmw_message_info_t &
-  get_rmw_message_info() const;
+  /// 以底层 rmw 消息信息类型返回消息信息。 (Return the message info as the underlying rmw message
+  /// info type.)
+  const rmw_message_info_t& get_rmw_message_info() const;
 
-  /// Return the message info as the underlying rmw message info type.
-  rmw_message_info_t &
-  get_rmw_message_info();
+  /// 以底层 rmw 消息信息类型返回消息信息。 (Return the message info as the underlying rmw message
+  /// info type.)
+  rmw_message_info_t& get_rmw_message_info();
 
 private:
+  /// rmw 消息信息变量。 (rmw message info variable.)
   rmw_message_info_t rmw_message_info_;
 };
 

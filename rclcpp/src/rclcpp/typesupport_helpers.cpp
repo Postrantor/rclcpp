@@ -25,66 +25,66 @@
 
 #include "ament_index_cpp/get_package_prefix.hpp"
 #include "ament_index_cpp/get_resources.hpp"
-#include "rcpputils/shared_library.hpp"
 #include "rcpputils/find_library.hpp"
+#include "rcpputils/shared_library.hpp"
 #include "rosidl_runtime_cpp/message_type_support_decl.hpp"
 
-namespace rclcpp
-{
+namespace rclcpp {
 
-namespace
-{
+namespace {
 
+// 查找ament前缀路径中的库。
 // Look for the library in the ament prefix paths.
 std::string get_typesupport_library_path(
-  const std::string & package_name, const std::string & typesupport_identifier)
+    const std::string &package_name,            // 包名
+    const std::string &typesupport_identifier)  // 类型支持标识符
 {
-  const char * dynamic_library_folder;
+  const char *dynamic_library_folder;
 #ifdef _WIN32
-  dynamic_library_folder = "/bin/";
+  dynamic_library_folder = "/bin/";  // Windows系统下的动态库文件夹
 #elif __APPLE__
-  dynamic_library_folder = "/lib/";
+  dynamic_library_folder = "/lib/";  // macOS系统下的动态库文件夹
 #else
-  dynamic_library_folder = "/lib/";
+  dynamic_library_folder = "/lib/";  // 其他系统下的动态库文件夹
 #endif
 
   std::string package_prefix;
   try {
+    // 获取包前缀
     package_prefix = ament_index_cpp::get_package_prefix(package_name);
-  } catch (ament_index_cpp::PackageNotFoundError & e) {
+  } catch (ament_index_cpp::PackageNotFoundError &e) {
     throw std::runtime_error(e.what());
   }
 
+  // 构建库路径
   const std::string library_path = rcpputils::path_for_library(
-    package_prefix + dynamic_library_folder,
-    package_name + "__" + typesupport_identifier);
+      package_prefix + dynamic_library_folder, package_name + "__" + typesupport_identifier);
   if (library_path.empty()) {
     throw std::runtime_error(
-            "Typesupport library for " + package_name + " does not exist in '" + package_prefix +
-            "'.");
+        "Typesupport library for " + package_name + " does not exist in '" + package_prefix + "'.");
   }
   return library_path;
 }
 
-std::tuple<std::string, std::string, std::string>
-extract_type_identifier(const std::string & full_type)
+// 提取类型标识符
+std::tuple<std::string, std::string, std::string> extract_type_identifier(
+    const std::string &full_type)  // 完整类型字符串
 {
   char type_separator = '/';
   auto sep_position_back = full_type.find_last_of(type_separator);
   auto sep_position_front = full_type.find_first_of(type_separator);
-  if (sep_position_back == std::string::npos ||
-    sep_position_back == 0 ||
-    sep_position_back == full_type.length() - 1)
-  {
+  if (sep_position_back == std::string::npos || sep_position_back == 0 ||
+      sep_position_back == full_type.length() - 1) {
     throw std::runtime_error(
-            "Message type is not of the form package/type and cannot be processed");
+        "Message type is not of the form package/type and cannot be processed");
   }
 
+  // 提取包名、中间模块和类型名
   std::string package_name = full_type.substr(0, sep_position_front);
   std::string middle_module = "";
   if (sep_position_back - sep_position_front > 0) {
     middle_module =
-      full_type.substr(sep_position_front + 1, sep_position_back - sep_position_front - 1);
+        full_type.substr(sep_position_front + 1, sep_position_back - sep_position_front - 1);
   }
   std::string type_name = full_type.substr(sep_position_back + 1);
 
@@ -93,39 +93,44 @@ extract_type_identifier(const std::string & full_type)
 
 }  // anonymous namespace
 
-std::shared_ptr<rcpputils::SharedLibrary>
-get_typesupport_library(const std::string & type, const std::string & typesupport_identifier)
+// 获取类型支持库
+std::shared_ptr<rcpputils::SharedLibrary> get_typesupport_library(
+    const std::string &type,                    // 类型字符串
+    const std::string &typesupport_identifier)  // 类型支持标识符
 {
   auto package_name = std::get<0>(extract_type_identifier(type));
   auto library_path = get_typesupport_library_path(package_name, typesupport_identifier);
   return std::make_shared<rcpputils::SharedLibrary>(library_path);
 }
 
-const rosidl_message_type_support_t *
-get_typesupport_handle(
-  const std::string & type,
-  const std::string & typesupport_identifier,
-  rcpputils::SharedLibrary & library)
+// 获取类型支持句柄
+const rosidl_message_type_support_t *get_typesupport_handle(
+    const std::string &type,                    // 类型字符串
+    const std::string &typesupport_identifier,  // 类型支持标识符
+    rcpputils::SharedLibrary &library)          // 动态库引用
 {
   std::string package_name;
   std::string middle_module;
   std::string type_name;
   std::tie(package_name, middle_module, type_name) = extract_type_identifier(type);
 
-  auto mk_error = [&package_name, &type_name](auto reason) {
-      std::stringstream rcutils_dynamic_loading_error;
-      rcutils_dynamic_loading_error <<
-        "Something went wrong loading the typesupport library for message type " << package_name <<
-        "/" << type_name << ". " << reason;
-      return rcutils_dynamic_loading_error.str();
-    };
+  auto mk_error =
+      [&package_name, &type_name](auto reason) {
+        std::stringstream rcutils_dynamic_loading_error;
+        rcutils_dynamic_loading_error
+            << "Something went wrong loading the typesupport library for message type "
+            << package_name << "/" << type_name << ". " << reason;
+        return rcutils_dynamic_loading_error.str();
+      };
 
   try {
+    // 构建符号名
     std::string symbol_name = typesupport_identifier + "__get_message_type_support_handle__" +
-      package_name + "__" + (middle_module.empty() ? "msg" : middle_module) + "__" + type_name;
+                              package_name + "__" +
+                              (middle_module.empty() ? "msg" : middle_module) + "__" + type_name;
 
-    const rosidl_message_type_support_t * (* get_ts)() = nullptr;
-    // This will throw runtime_error if the symbol was not found.
+    const rosidl_message_type_support_t *(*get_ts)() = nullptr;
+    // 这将在找不到符号时抛出runtime_error。
     get_ts = reinterpret_cast<decltype(get_ts)>(library.get_symbol(symbol_name));
     return get_ts();
   } catch (std::runtime_error &) {

@@ -32,48 +32,60 @@
 #include "rclcpp/topic_statistics_state.hpp"
 #include "rclcpp/visibility_control.hpp"
 
-namespace rclcpp
-{
+namespace rclcpp {
 
+/// 非模板基类，用于订阅选项。
 /// Non-template base class for subscription options.
-struct SubscriptionOptionsBase
-{
+struct SubscriptionOptionsBase {
+  /// 与此订阅相关的事件回调。
   /// Callbacks for events related to this subscription.
   SubscriptionEventCallbacks event_callbacks;
 
+  /// 当用户在event_callbacks中不提供任何回调时，是否使用默认回调
   /// Whether or not to use default callbacks when user doesn't supply any in event_callbacks
   bool use_default_callbacks = true;
 
+  /// 是否忽略本地发布。
   /// True to ignore local publications.
   bool ignore_local_publications = false;
 
+  /// 要求中间件生成唯一的网络流端点
+  /// 默认情况下禁用
   /// Require middleware to generate unique network flow endpoints
   /// Disabled by default
   rmw_unique_network_flow_endpoints_requirement_t require_unique_network_flow_endpoints =
-    RMW_UNIQUE_NETWORK_FLOW_ENDPOINTS_NOT_REQUIRED;
+      RMW_UNIQUE_NETWORK_FLOW_ENDPOINTS_NOT_REQUIRED;
 
+  /// 此订阅的回调组。NULL表示使用默认回调组。
   /// The callback group for this subscription. NULL to use the default callback group.
   rclcpp::CallbackGroup::SharedPtr callback_group = nullptr;
 
+  /// 显式设置进程内通信。
   /// Setting to explicitly set intraprocess communications.
   IntraProcessSetting use_intra_process_comm = IntraProcessSetting::NodeDefault;
 
+  /// 设置存储在进程内缓冲区中的数据类型
   /// Setting the data-type stored in the intraprocess buffer
   IntraProcessBufferType intra_process_buffer_type = IntraProcessBufferType::CallbackDefault;
 
+  /// 创建订阅时使用的可选RMW实现特定有效负载。
   /// Optional RMW implementation specific payload to be used during creation of the subscription.
   std::shared_ptr<rclcpp::detail::RMWImplementationSpecificSubscriptionPayload>
-  rmw_implementation_payload = nullptr;
+      rmw_implementation_payload = nullptr;
 
+  // 订阅中配置主题统计信息收集器的选项。
   // Options to configure topic statistics collector in the subscription.
-  struct TopicStatisticsOptions
-  {
+  struct TopicStatisticsOptions {
+    // 启用和禁用主题统计信息计算和发布。默认为禁用。
     // Enable and disable topic statistics calculation and publication. Defaults to disabled.
     TopicStatisticsState state = TopicStatisticsState::NodeDefault;
 
+    // 主题统计信息启用时发布的主题。默认为/statistics。
     // Topic to which topic statistics get published when enabled. Defaults to /statistics.
     std::string publish_topic = "/statistics";
 
+    // 主题统计信息发布周期，以毫秒为单位。默认为1秒。
+    // 只允许大于零的值。
     // Topic statistics publication period in ms. Defaults to one second.
     // Only values greater than zero are allowed.
     std::chrono::milliseconds publish_period{std::chrono::seconds(1)};
@@ -86,66 +98,67 @@ struct SubscriptionOptionsBase
   ContentFilterOptions content_filter_options;
 };
 
+/// 包含订阅可选配置的结构。
 /// Structure containing optional configuration for Subscriptions.
-template<typename Allocator>
-struct SubscriptionOptionsWithAllocator : public SubscriptionOptionsBase
-{
+template <typename Allocator>
+struct SubscriptionOptionsWithAllocator : public SubscriptionOptionsBase {
   static_assert(
-    std::is_void_v<typename std::allocator_traits<Allocator>::value_type>,
-    "Subscription allocator value type must be void");
+      std::is_void_v<typename std::allocator_traits<Allocator>::value_type>,
+      "Subscription allocator value type must be void");
 
+  /// 可选的自定义分配器。
   /// Optional custom allocator.
   std::shared_ptr<Allocator> allocator = nullptr;
 
   SubscriptionOptionsWithAllocator() {}
 
+  /// 使用基类作为输入的构造函数。
   /// Constructor using base class as input.
   explicit SubscriptionOptionsWithAllocator(
-    const SubscriptionOptionsBase & subscription_options_base)
-  : SubscriptionOptionsBase(subscription_options_base)
-  {}
+      const SubscriptionOptionsBase &subscription_options_base)
+      : SubscriptionOptionsBase(subscription_options_base) {}
 
+  /// 将此类与rclcpp::QoS一起转换为rcl_subscription_options_t。
+  /**
+   * \param qos 订阅的QoS配置文件。
+   * \return 基于rclcpp::QoS的rcl_subscription_options_t结构
+   */
   /// Convert this class, with a rclcpp::QoS, into an rcl_subscription_options_t.
   /**
    * \param qos QoS profile for subcription.
    * \return rcl_subscription_options_t structure based on the rclcpp::QoS
    */
-  rcl_subscription_options_t
-  to_rcl_subscription_options(const rclcpp::QoS & qos) const
-  {
+  rcl_subscription_options_t to_rcl_subscription_options(const rclcpp::QoS &qos) const {
     rcl_subscription_options_t result = rcl_subscription_get_default_options();
     result.allocator = this->get_rcl_allocator();
     result.qos = qos.get_rmw_qos_profile();
     result.rmw_subscription_options.ignore_local_publications = this->ignore_local_publications;
     result.rmw_subscription_options.require_unique_network_flow_endpoints =
-      this->require_unique_network_flow_endpoints;
+        this->require_unique_network_flow_endpoints;
 
+    // 如果需要，将有效负载应用到rcl_subscription_options中。
     // Apply payload to rcl_subscription_options if necessary.
     if (rmw_implementation_payload && rmw_implementation_payload->has_been_customized()) {
       rmw_implementation_payload->modify_rmw_subscription_options(result.rmw_subscription_options);
     }
 
+    // 将content_filter_options复制到rcl_subscription_options中。
     // Copy content_filter_options into rcl_subscription_options.
     if (!content_filter_options.filter_expression.empty()) {
       std::vector<const char *> cstrings =
-        get_c_vector_string(content_filter_options.expression_parameters);
+          get_c_vector_string(content_filter_options.expression_parameters);
       rcl_ret_t ret = rcl_subscription_options_set_content_filter_options(
-        get_c_string(content_filter_options.filter_expression),
-        cstrings.size(),
-        cstrings.data(),
-        &result);
+          get_c_string(content_filter_options.filter_expression), cstrings.size(), cstrings.data(),
+          &result);
       if (RCL_RET_OK != ret) {
-        rclcpp::exceptions::throw_from_rcl_error(
-          ret, "failed to set content_filter_options");
+        rclcpp::exceptions::throw_from_rcl_error(ret, "failed to set content_filter_options");
       }
     }
 
     return result;
   }
 
-  std::shared_ptr<Allocator>
-  get_allocator() const
-  {
+  std::shared_ptr<Allocator> get_allocator() const {
     if (!this->allocator) {
       if (!allocator_storage_) {
         allocator_storage_ = std::make_shared<Allocator>();
@@ -156,23 +169,23 @@ struct SubscriptionOptionsWithAllocator : public SubscriptionOptionsBase
   }
 
 private:
-  using PlainAllocator =
-    typename std::allocator_traits<Allocator>::template rebind_alloc<char>;
+  using PlainAllocator = typename std::allocator_traits<Allocator>::template rebind_alloc<char>;
 
-  rcl_allocator_t
-  get_rcl_allocator() const
-  {
+  rcl_allocator_t get_rcl_allocator() const {
     if (!plain_allocator_storage_) {
-      plain_allocator_storage_ =
-        std::make_shared<PlainAllocator>(*this->get_allocator());
+      plain_allocator_storage_ = std::make_shared<PlainAllocator>(*this->get_allocator());
     }
     return rclcpp::allocator::get_rcl_allocator<char>(*plain_allocator_storage_);
   }
 
+  // 这是一个临时解决方案，确保get_allocator()
+  // 始终返回相同分配器的副本。
   // This is a temporal workaround, to make sure that get_allocator()
   // always returns a copy of the same allocator.
   mutable std::shared_ptr<Allocator> allocator_storage_;
 
+  // 这是一个临时解决方案，以保持支持
+  // 在rcl_subscription_options_t中返回的rcl分配器的普通分配器。
   // This is a temporal workaround, to keep the plain allocator that backs
   // up the rcl allocator returned in rcl_subscription_options_t alive.
   mutable std::shared_ptr<PlainAllocator> plain_allocator_storage_;

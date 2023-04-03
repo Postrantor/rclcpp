@@ -22,126 +22,164 @@
 
 #include "rclcpp/visibility_control.hpp"
 
-namespace rclcpp
-{
-namespace node_interfaces
-{
-namespace detail
-{
+namespace rclcpp {
+namespace node_interfaces {
+namespace detail {
 
-// Support and Helper template classes for the NodeInterfaces class.
+/**
+ * @brief 初始化元组的辅助函数 (Helper function to initialize the tuple)
+ *
+ * @tparam NodeT 节点类型 (Node type)
+ * @tparam Ts 接口类型参数包 (Interface types parameter pack)
+ * @param n 节点引用 (Node reference)
+ * @return std::tuple<std::shared_ptr<Ts>...> 初始化后的接口元组 (Initialized interface tuple)
+ */
+template <typename NodeT, typename... Ts>
+std::tuple<std::shared_ptr<Ts>...> init_tuple(NodeT &n);
 
-template<typename NodeT, typename ... Ts>
-std::tuple<std::shared_ptr<Ts>...>
-init_tuple(NodeT & n);
+/// 存储接口的元组、提供构造函数和getter方法的结构体 (Structure that stores the interfaces in a
+/// tuple, provides constructors, and getters.)
+template <typename... InterfaceTs>
+struct NodeInterfacesStorage {
+  /**
+   * @brief 构造函数，使用节点初始化接口元组 (Constructor using node to initialize the interface
+   * tuple)
+   *
+   * @tparam NodeT 节点类型 (Node type)
+   * @param node 节点引用 (Node reference)
+   */
+  template <typename NodeT>
+  NodeInterfacesStorage(NodeT &node)  // NOLINT(runtime/explicit)
+      : interfaces_(init_tuple<decltype(node), InterfaceTs...>(node)) {}
 
-/// Stores the interfaces in a tuple, provides constructors, and getters.
-template<typename ... InterfaceTs>
-struct NodeInterfacesStorage
-{
-  template<typename NodeT>
-  NodeInterfacesStorage(NodeT & node)  // NOLINT(runtime/explicit)
-  : interfaces_(init_tuple<decltype(node), InterfaceTs ...>(node))
-  {}
+  /**
+   * @brief 显式构造函数，使用共享指针初始化接口元组 (Explicit constructor using shared pointers to
+   * initialize the interface tuple)
+   *
+   * @param args 接口共享指针 (Interface shared pointers)
+   */
+  explicit NodeInterfacesStorage(std::shared_ptr<InterfaceTs>... args) : interfaces_(args...) {}
 
-  explicit NodeInterfacesStorage(std::shared_ptr<InterfaceTs>... args)
-  : interfaces_(args ...)
-  {}
-
-  /// Individual Node Interface non-const getter.
-  template<typename NodeInterfaceT>
-  std::shared_ptr<NodeInterfaceT>
-  get()
-  {
+  /**
+   * @brief 获取单个节点接口的非常量 getter 方法 (Non-const getter for individual Node Interface)
+   *
+   * @tparam NodeInterfaceT 要获取的节点接口类型 (Type of the Node Interface to get)
+   * @return std::shared_ptr<NodeInterfaceT> 节点接口的共享指针 (Shared pointer to the Node
+   * Interface)
+   */
+  template <typename NodeInterfaceT>
+  std::shared_ptr<NodeInterfaceT> get() {
     static_assert(
-      (std::is_same_v<NodeInterfaceT, InterfaceTs>|| ...),
-      "NodeInterfaces class does not contain given NodeInterfaceT");
+        (std::is_same_v<NodeInterfaceT, InterfaceTs> || ...),
+        "NodeInterfaces class does not contain given NodeInterfaceT");
     return std::get<std::shared_ptr<NodeInterfaceT>>(interfaces_);
   }
 
-  /// Individual Node Interface const getter.
-  template<typename NodeInterfaceT>
-  std::shared_ptr<const NodeInterfaceT>
-  get() const
-  {
+  /**
+   * @brief 获取单个节点接口的常量 getter 方法 (Const getter for individual Node Interface)
+   *
+   * @tparam NodeInterfaceT 要获取的节点接口类型 (Type of the Node Interface to get)
+   * @return std::shared_ptr<const NodeInterfaceT> 节点接口的常量共享指针 (Const shared pointer to
+   * the Node Interface)
+   */
+  template <typename NodeInterfaceT>
+  std::shared_ptr<const NodeInterfaceT> get() const {
     static_assert(
-      (std::is_same_v<NodeInterfaceT, InterfaceTs>|| ...),
-      "NodeInterfaces class does not contain given NodeInterfaceT");
+        (std::is_same_v<NodeInterfaceT, InterfaceTs> || ...),
+        "NodeInterfaces class does not contain given NodeInterfaceT");
     return std::get<std::shared_ptr<NodeInterfaceT>>(interfaces_);
   }
 
 protected:
-  std::tuple<std::shared_ptr<InterfaceTs>...> interfaces_;
+  std::tuple<std::shared_ptr<InterfaceTs>...> interfaces_;  ///< 接口元组 (Interface tuple)
 };
 
-/// Prototype of NodeInterfacesSupports.
+/// 原型 NodeInterfacesSupports.
 /**
- * Should read NodeInterfacesSupports<..., T, ...> as "NodeInterfaces supports T", and
- * if NodeInterfacesSupport is specialized for T, the is_supported should be
- * set to std::true_type, but by default it is std::false_type, which will
- * lead to a compiler error when trying to use T with NodeInterfaces.
+ * 应将 NodeInterfacesSupports<..., T, ...> 读作 "NodeInterfaces 支持 T"，并且
+ * 如果为 T 专门化了 NodeInterfacesSupport，则 is_supported 应设置为
+ * std::true_type，但默认情况下，它是 std::false_type，这将
+ * 导致在尝试使用 NodeInterfaces 的 T 时出现编译器错误。
  */
-template<typename StorageClassT, typename ... Ts>
+template <typename StorageClassT, typename... Ts>
 struct NodeInterfacesSupports;
 
-/// Prototype of NodeInterfacesSupportCheck template meta-function.
+/// NodeInterfacesSupportCheck 模板元函数的原型.
 /**
- * This meta-function checks that all the types given are supported,
- * throwing a more human-readable error if an unsupported type is used.
+ * 此元函数检查给定的所有类型是否受支持，
+ * 如果使用不受支持的类型，将抛出更易于人类阅读的错误。
  */
-template<typename StorageClassT, typename ... InterfaceTs>
+template <typename StorageClassT, typename... InterfaceTs>
 struct NodeInterfacesSupportCheck;
 
-/// Iterating specialization that ensures classes are supported and inherited.
-template<typename StorageClassT, typename NextInterfaceT, typename ... RemainingInterfaceTs>
-struct NodeInterfacesSupportCheck<StorageClassT, NextInterfaceT, RemainingInterfaceTs ...>
-  : public NodeInterfacesSupportCheck<StorageClassT, RemainingInterfaceTs ...>
-{
+/// 迭代特殊化，确保类受支持并被继承。
+template <typename StorageClassT, typename NextInterfaceT, typename... RemainingInterfaceTs>
+struct NodeInterfacesSupportCheck<StorageClassT, NextInterfaceT, RemainingInterfaceTs...>
+    : public NodeInterfacesSupportCheck<StorageClassT, RemainingInterfaceTs...> {
+  // 静态断言，检查 NodeInterfacesSupports 是否支持 NextInterfaceT
   static_assert(
-    NodeInterfacesSupports<StorageClassT, NextInterfaceT>::is_supported::value,
-    "given NodeInterfaceT is not supported by rclcpp::node_interfaces::NodeInterfaces");
+      NodeInterfacesSupports<StorageClassT, NextInterfaceT>::is_supported::value,
+      "given NodeInterfaceT is not supported by rclcpp::node_interfaces::NodeInterfaces");
 };
 
-/// Terminating case when there are no more "RemainingInterfaceTs".
-template<typename StorageClassT>
-struct NodeInterfacesSupportCheck<StorageClassT>
-{};
+/// 当没有更多的 "RemainingInterfaceTs" 时终止。
+template <typename StorageClassT>
+struct NodeInterfacesSupportCheck<StorageClassT> {};
 
-/// Default specialization, needs to be specialized for each supported interface.
-template<typename StorageClassT, typename ... RemainingInterfaceTs>
-struct NodeInterfacesSupports
-{
-  // Specializations need to set this to std::true_type in addition to other interfaces.
+/// 默认特化，需要为每个支持的接口进行特化。
+template <typename StorageClassT, typename... RemainingInterfaceTs>
+struct NodeInterfacesSupports {
+  // 特化需要将其设置为 std::true_type，以便于其他接口使用。
   using is_supported = std::false_type;
 };
 
 /// Terminating specialization of NodeInterfacesSupports.
-template<typename StorageClassT>
-struct NodeInterfacesSupports<StorageClassT>
-  : public StorageClassT
-{
+/**
+ * @tparam StorageClassT 类型参数，用于指定存储类 (Type parameter, used to specify the storage
+ * class)
+ */
+template <typename StorageClassT>
+struct NodeInterfacesSupports<StorageClassT> : public StorageClassT {
   /// Perfect forwarding constructor to get arguments down to StorageClassT.
-  template<typename ... ArgsT>
-  explicit NodeInterfacesSupports(ArgsT && ... args)
-  : StorageClassT(std::forward<ArgsT>(args) ...)
-  {}
+  /**
+   * @tparam ArgsT 类型参数包，用于构造函数的完美转发 (Type parameter pack, used for perfect
+   * forwarding in the constructor)
+   * @param args 可变参数列表，用于传递给 StorageClassT 的构造函数 (Variadic argument list, used to
+   * pass to the constructor of StorageClassT)
+   */
+  template <typename... ArgsT>
+  explicit NodeInterfacesSupports(ArgsT &&...args) : StorageClassT(std::forward<ArgsT>(args)...) {}
 };
 
 // Helper functions to initialize the tuple in NodeInterfaces.
 
-template<typename StorageClassT, typename ElementT, typename TupleT, typename NodeT>
-void
-init_element(TupleT & t, NodeT & n)
-{
+/**
+ * @brief 初始化元素 (Initialize element)
+ *
+ * @tparam StorageClassT 存储类类型 (Storage class type)
+ * @tparam ElementT 元素类型 (Element type)
+ * @tparam TupleT 元组类型 (Tuple type)
+ * @tparam NodeT 节点类型 (Node type)
+ * @param t 元组引用 (Tuple reference)
+ * @param n 节点引用 (Node reference)
+ */
+template <typename StorageClassT, typename ElementT, typename TupleT, typename NodeT>
+void init_element(TupleT &t, NodeT &n) {
   std::get<std::shared_ptr<ElementT>>(t) =
-    NodeInterfacesSupports<StorageClassT, ElementT>::get_from_node_like(n);
+      NodeInterfacesSupports<StorageClassT, ElementT>::get_from_node_like(n);
 }
 
-template<typename NodeT, typename ... Ts>
-std::tuple<std::shared_ptr<Ts>...>
-init_tuple(NodeT & n)
-{
-  using StorageClassT = NodeInterfacesStorage<Ts ...>;
+/**
+ * @brief 初始化元组 (Initialize tuple)
+ *
+ * @tparam NodeT 节点类型 (Node type)
+ * @tparam Ts 可变模板参数，元素类型 (Variadic template parameters, element types)
+ * @param n 节点引用 (Node reference)
+ * @return 初始化后的元组 (Initialized tuple)
+ */
+template <typename NodeT, typename... Ts>
+std::tuple<std::shared_ptr<Ts>...> init_tuple(NodeT &n) {
+  using StorageClassT = NodeInterfacesStorage<Ts...>;
   std::tuple<std::shared_ptr<Ts>...> t;
   (init_element<StorageClassT, Ts>(t, n), ...);
   return t;
@@ -149,8 +187,19 @@ init_tuple(NodeT & n)
 
 /// Macro for creating specializations with less boilerplate.
 /**
- * You can use this macro to add support for your interface class if:
+ * 使用此宏可以为接口类添加支持（在以下情况下）：
+ * - 标准 getter 是 get_node_{NodeInterfaceName}_interface()，以及
+ * - getter 返回一个非 const shared_ptr<{NodeInterfaceType}>
  *
+ * 在 rclcpp 中，可以看到使用此功能的标准节点接口头文件示例，
+ * 例如 rclcpp/node_interfaces/node_base_interface.hpp 包含：
+ *
+ *   RCLCPP_NODE_INTERFACE_HELPERS_SUPPORT(rclcpp::node_interfaces::NodeBaseInterface, base)
+ *
+ * 如果您的接口具有非标准 getter，或者希望对其进行检测或其他操作，
+ * 则需要在不使用此宏的情况下创建自己的 NodeInterfacesSupports 结构体特化。
+ *
+ * You can use this macro to add support for your interface class if:
  * - The standard getter is get_node_{NodeInterfaceName}_interface(), and
  * - the getter returns a non-const shared_ptr<{NodeInterfaceType}>
  *
@@ -163,38 +212,28 @@ init_tuple(NodeT & n)
  * something like that, then you'll need to create your own specialization of
  * the NodeInterfacesSupports struct without this macro.
  */
-#define RCLCPP_NODE_INTERFACE_HELPERS_SUPPORT(NodeInterfaceType, NodeInterfaceName) \
-  namespace rclcpp::node_interfaces::detail { \
-  template<typename StorageClassT, typename ... RemainingInterfaceTs> \
-  struct NodeInterfacesSupports< \
-    StorageClassT, \
-    NodeInterfaceType, \
-    RemainingInterfaceTs ...> \
-    : public NodeInterfacesSupports<StorageClassT, RemainingInterfaceTs ...> \
-  { \
-    using is_supported = std::true_type; \
- \
-    template<typename NodeT> \
-    static \
-    std::shared_ptr<NodeInterfaceType> \
-    get_from_node_like(NodeT & node_like) \
-    { \
-      return node_like.get_node_ ## NodeInterfaceName ## _interface(); \
-    } \
- \
+#define RCLCPP_NODE_INTERFACE_HELPERS_SUPPORT(NodeInterfaceType, NodeInterfaceName)           \
+  namespace rclcpp::node_interfaces::detail {                                                 \
+  template <typename StorageClassT, typename... RemainingInterfaceTs>                         \
+  struct NodeInterfacesSupports<StorageClassT, NodeInterfaceType, RemainingInterfaceTs...>    \
+      : public NodeInterfacesSupports<StorageClassT, RemainingInterfaceTs...> {               \
+    using is_supported = std::true_type;                                                      \
+                                                                                              \
+    template <typename NodeT>                                                                 \
+    static std::shared_ptr<NodeInterfaceType> get_from_node_like(NodeT &node_like) {          \
+      return node_like.get_node_##NodeInterfaceName##_interface();                            \
+    }                                                                                         \
+                                                                                              \
     /* Perfect forwarding constructor to get arguments down to StorageClassT (eventually). */ \
-    template<typename ... ArgsT> \
-    explicit NodeInterfacesSupports(ArgsT && ... args) \
-      : NodeInterfacesSupports<StorageClassT, RemainingInterfaceTs ...>( \
-        std::forward<ArgsT>(args) ...) \
-    {} \
- \
-    std::shared_ptr<NodeInterfaceType> \
-    get_node_ ## NodeInterfaceName ## _interface() \
-    { \
-      return StorageClassT::template get<NodeInterfaceType>(); \
-    } \
-  }; \
+    template <typename... ArgsT>                                                              \
+    explicit NodeInterfacesSupports(ArgsT &&...args)                                          \
+        : NodeInterfacesSupports<StorageClassT, RemainingInterfaceTs...>(                     \
+              std::forward<ArgsT>(args)...) {}                                                \
+                                                                                              \
+    std::shared_ptr<NodeInterfaceType> get_node_##NodeInterfaceName##_interface() {           \
+      return StorageClassT::template get<NodeInterfaceType>();                                \
+    }                                                                                         \
+  };                                                                                          \
   }  // namespace rclcpp::node_interfaces::detail
 
 }  // namespace detail

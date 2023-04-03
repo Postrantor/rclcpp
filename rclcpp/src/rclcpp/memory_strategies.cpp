@@ -20,8 +20,17 @@
 
 using rclcpp::memory_strategies::allocator_memory_strategy::AllocatorMemoryStrategy;
 
+/**
+ * @brief 创建默认内存策略
+ * @brief Create the default memory strategy
+ *
+ * @return 返回一个共享指针，指向默认的内存策略实例
+ * @return Returns a shared pointer to the default memory strategy instance
+ */
 rclcpp::memory_strategy::MemoryStrategy::SharedPtr
-rclcpp::memory_strategies::create_default_strategy()
-{
+rclcpp::memory_strategies::create_default_strategy() {
+  // 使用 std::make_shared 创建一个 AllocatorMemoryStrategy 的实例，并返回其共享指针
+  // Use std::make_shared to create an instance of AllocatorMemoryStrategy and return its shared
+  // pointer
   return std::make_shared<AllocatorMemoryStrategy<>>();
 }

@@ -27,30 +27,52 @@
 
 #include "rclcpp/macros.hpp"
 
-namespace rclcpp
-{
+namespace rclcpp {
 
-template<typename Callable>
-struct ScopeExit
-{
-  explicit ScopeExit(Callable callable)
-  : callable_(callable) {}
-  ~ScopeExit() {callable_();}
+/**
+ * @brief 一个模板类，用于在离开作用域时执行给定的 Callable 对象（A template class for executing a
+ * given Callable object when leaving the scope）
+ *
+ * @tparam Callable 可调用对象类型（Callable object type）
+ */
+template <typename Callable>
+struct ScopeExit {
+  /**
+   * @brief 构造函数，接收一个 Callable 对象并存储为成员变量（Constructor that takes a Callable
+   * object and stores it as a member variable）
+   *
+   * @param callable 需要在作用域结束时执行的可调用对象（Callable object to be executed when the
+   * scope ends）
+   */
+  explicit ScopeExit(Callable callable) : callable_(callable) {}
+
+  /**
+   * @brief 析构函数，在作用域结束时调用存储的 Callable 对象（Destructor that calls the stored
+   * Callable object when the scope ends）
+   */
+  ~ScopeExit() { callable_(); }
 
 private:
-  Callable callable_;
+  Callable callable_;  ///< 存储的可调用对象（Stored Callable object）
 };
 
-template<typename Callable>
-ScopeExit<Callable>
-make_scope_exit(Callable callable)
-{
+/**
+ * @brief 创建一个 ScopeExit 对象的辅助函数（Helper function to create a ScopeExit object）
+ *
+ * @tparam Callable 可调用对象类型（Callable object type）
+ * @param callable 需要在作用域结束时执行的可调用对象（Callable object to be executed when the scope
+ * ends）
+ * @return ScopeExit<Callable> 返回一个已初始化的 ScopeExit 对象（Returns an initialized ScopeExit
+ * object）
+ */
+template <typename Callable>
+ScopeExit<Callable> make_scope_exit(Callable callable) {
   return ScopeExit<Callable>(callable);
 }
 
 }  // namespace rclcpp
 
 #define RCLCPP_SCOPE_EXIT(code) \
-  auto RCLCPP_STRING_JOIN(scope_exit_, __LINE__) = rclcpp::make_scope_exit([&]() {code;})
+  auto RCLCPP_STRING_JOIN(scope_exit_, __LINE__) = rclcpp::make_scope_exit([&]() { code; })
 
 #endif  // RCLCPP__SCOPE_EXIT_HPP_

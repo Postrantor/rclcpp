@@ -20,32 +20,39 @@
 #include "rclcpp/node_interfaces/detail/node_interfaces_helpers.hpp"
 #include "rclcpp/visibility_control.hpp"
 
-namespace rclcpp
-{
-namespace node_interfaces
-{
+namespace rclcpp {
+namespace node_interfaces {
 
+/// 纯虚接口类，用于实现节点 API 中的 NodeClock 部分。
 /// Pure virtual interface class for the NodeClock part of the Node API.
-class NodeClockInterface
-{
+class NodeClockInterface {
 public:
+  // 只使用智能指针别名，不允许拷贝和赋值。
+  // Use smart pointer aliases only, disallow copy and assignment.
   RCLCPP_SMART_PTR_ALIASES_ONLY(NodeClockInterface)
 
+  // 公共虚析构函数，使用默认实现。
+  // Public virtual destructor with default implementation.
   RCLCPP_PUBLIC
-  virtual
-  ~NodeClockInterface() = default;
+  virtual ~NodeClockInterface() = default;
 
+  /// 获取一个 ROS 时钟，该时钟将由节点保持更新。
   /// Get a ROS clock which will be kept up to date by the node.
+  /**
+   * \return 返回一个共享指针，指向 ROS 时钟对象。
+   * \return A shared pointer to a ROS clock object.
+   */
   RCLCPP_PUBLIC
-  virtual
-  rclcpp::Clock::SharedPtr
-  get_clock() = 0;
+  virtual rclcpp::Clock::SharedPtr get_clock() = 0;
 
+  /// 获取一个 const ROS 时钟，该时钟将由节点保持更新。
   /// Get a const ROS clock which will be kept up to date by the node.
+  /**
+   * \return 返回一个常量共享指针，指向 ROS 时钟对象。
+   * \return A constant shared pointer to a ROS clock object.
+   */
   RCLCPP_PUBLIC
-  virtual
-  rclcpp::Clock::ConstSharedPtr
-  get_clock() const = 0;
+  virtual rclcpp::Clock::ConstSharedPtr get_clock() const = 0;
 };
 
 }  // namespace node_interfaces

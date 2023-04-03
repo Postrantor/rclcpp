@@ -18,27 +18,38 @@
 #include <stdexcept>
 #include <string>
 
-namespace rclcpp_action
-{
-namespace exceptions
-{
-class UnknownGoalHandleError : public std::invalid_argument
-{
+namespace rclcpp_action {
+namespace exceptions {
+/**
+ * @class UnknownGoalHandleError
+ * @brief 自定义异常类，表示未知的目标句柄错误 (Custom exception class representing unknown goal
+ * handle errors)
+ * @details 继承自 std::invalid_argument (Derived from std::invalid_argument)
+ */
+class UnknownGoalHandleError : public std::invalid_argument {
 public:
-  UnknownGoalHandleError()
-  : std::invalid_argument("Goal handle is not known to this client.")
-  {
-  }
+  /**
+   * @brief 构造函数，初始化异常消息 (Constructor, initializes the exception message)
+   */
+  UnknownGoalHandleError() : std::invalid_argument("Goal handle is not known to this client.") {}
 };
 
-class UnawareGoalHandleError : public std::runtime_error
-{
+/**
+ * @class UnawareGoalHandleError
+ * @brief 自定义异常类，表示不了解目标句柄错误 (Custom exception class representing unaware goal
+ * handle errors)
+ * @details 继承自 std::runtime_error (Derived from std::runtime_error)
+ */
+class UnawareGoalHandleError : public std::runtime_error {
 public:
+  /**
+   * @brief 带有默认消息的构造函数 (Constructor with default message)
+   * @param message 异常消息，默认为 "Goal handle is not tracking the goal result." (Exception
+   * message, default is "Goal handle is not tracking the goal result.")
+   */
   UnawareGoalHandleError(
-    const std::string & message = "Goal handle is not tracking the goal result.")
-  : std::runtime_error(message)
-  {
-  }
+      const std::string& message = "Goal handle is not tracking the goal result.")
+      : std::runtime_error(message) {}
 };
 
 }  // namespace exceptions

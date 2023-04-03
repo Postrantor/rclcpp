@@ -18,40 +18,49 @@
 #include <chrono>
 #include <functional>
 
-namespace rclcpp
-{
-namespace wait_set_policies
-{
-namespace detail
-{
+namespace rclcpp {
+namespace wait_set_policies {
+namespace detail {
 
-/// Common structure for synchronization policies.
-class SynchronizationPolicyCommon
-{
+/// @brief 同步策略的通用结构 (Common structure for synchronization policies).
+class SynchronizationPolicyCommon {
 protected:
+  /// @brief 默认构造函数 (Default constructor).
   SynchronizationPolicyCommon() = default;
+  /// @brief 默认析构函数 (Default destructor).
   ~SynchronizationPolicyCommon() = default;
 
-  std::function<bool()>
-  create_loop_predicate(
-    std::chrono::nanoseconds time_to_wait_ns,
-    std::chrono::steady_clock::time_point start)
-  {
+  /**
+   * @brief 创建循环谓词函数 (Create a loop predicate function).
+   * @param time_to_wait_ns 等待时间，单位为纳秒 (Time to wait in nanoseconds).
+   * @param start 开始时间点 (Start time point).
+   * @return 返回一个布尔值的函数，表示是否继续循环 (Returns a function that returns a boolean
+   * indicating whether to continue looping).
+   */
+  std::function<bool()> create_loop_predicate(
+      std::chrono::nanoseconds time_to_wait_ns, std::chrono::steady_clock::time_point start) {
     if (time_to_wait_ns >= std::chrono::nanoseconds(0)) {
-      // If time_to_wait_ns is >= 0 schedule against a deadline.
+      // 如果 time_to_wait_ns >= 0，则根据截止时间进行调度 (If time_to_wait_ns is >= 0 schedule
+      // against a deadline).
       auto deadline = start + time_to_wait_ns;
-      return [deadline]() -> bool {return std::chrono::steady_clock::now() < deadline;};
+      return [deadline]() -> bool { return std::chrono::steady_clock::now() < deadline; };
     } else {
-      // In the case of time_to_wait_ns < 0, just always return true to loop forever.
-      return []() -> bool {return true;};
+      // 如果 time_to_wait_ns < 0，则始终返回 true 以无限循环 (In the case of time_to_wait_ns < 0,
+      // just always return true to loop forever).
+      return []() -> bool { return true; };
     }
   }
 
-  std::chrono::nanoseconds
-  calculate_time_left_to_wait(
-    std::chrono::nanoseconds original_time_to_wait_ns,
-    std::chrono::steady_clock::time_point start)
-  {
+  /**
+   * @brief 计算剩余等待时间 (Calculate the time left to wait).
+   * @param original_time_to_wait_ns 最初的等待时间，单位为纳秒 (The original time to wait in
+   * nanoseconds).
+   * @param start 开始时间点 (Start time point).
+   * @return 返回剩余的等待时间，单位为纳秒 (Returns the remaining time to wait in nanoseconds).
+   */
+  std::chrono::nanoseconds calculate_time_left_to_wait(
+      std::chrono::nanoseconds original_time_to_wait_ns,
+      std::chrono::steady_clock::time_point start) {
     std::chrono::nanoseconds time_left_to_wait;
     if (original_time_to_wait_ns < std::chrono::nanoseconds(0)) {
       time_left_to_wait = original_time_to_wait_ns;

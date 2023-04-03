@@ -23,38 +23,40 @@
 #include "rclcpp/node_interfaces/node_logging_interface.hpp"
 #include "rclcpp/visibility_control.hpp"
 
-namespace rclcpp
-{
-namespace node_interfaces
-{
+namespace rclcpp {
+namespace node_interfaces {
 
-/// Implementation of the NodeLogging part of the Node API.
-class NodeLogging : public NodeLoggingInterface
-{
+/// 实现 Node API 的 NodeLogging 部分。 (Implementation of the NodeLogging part of the Node API.)
+class NodeLogging : public NodeLoggingInterface {
 public:
+  /// 只使用智能指针别名。 (Only use smart pointer aliases.)
   RCLCPP_SMART_PTR_ALIASES_ONLY(NodeLoggingInterface)
 
+  /// 公共构造函数。 (Public constructor.)
   RCLCPP_PUBLIC
-  explicit NodeLogging(rclcpp::node_interfaces::NodeBaseInterface * node_base);
+  explicit NodeLogging(rclcpp::node_interfaces::NodeBaseInterface* node_base);
 
+  /// 公共虚析构函数。 (Public virtual destructor.)
   RCLCPP_PUBLIC
-  virtual
-  ~NodeLogging();
+  virtual ~NodeLogging();
 
+  /// 获取 logger 的公共成员函数。 (Public member function to get the logger.)
   RCLCPP_PUBLIC
-  rclcpp::Logger
-  get_logger() const override;
+  rclcpp::Logger get_logger() const override;
 
+  /// 获取 logger 名称的公共成员函数。 (Public member function to get the logger name.)
   RCLCPP_PUBLIC
-  const char *
-  get_logger_name() const override;
+  const char* get_logger_name() const override;
 
 private:
+  /// 禁用复制构造函数和赋值运算符。 (Disable copy constructor and assignment operator.)
   RCLCPP_DISABLE_COPY(NodeLogging)
 
-  /// Handle to the NodeBaseInterface given in the constructor.
-  rclcpp::node_interfaces::NodeBaseInterface * node_base_;
+  /// 在构造函数中给定的 NodeBaseInterface 句柄。 (Handle to the NodeBaseInterface given in the
+  /// constructor.)
+  rclcpp::node_interfaces::NodeBaseInterface* node_base_;
 
+  /// Logger 实例。 (Logger instance.)
   rclcpp::Logger logger_;
 };
 

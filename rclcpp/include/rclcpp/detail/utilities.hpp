@@ -15,24 +15,28 @@
 #ifndef RCLCPP__DETAIL__UTILITIES_HPP_
 #define RCLCPP__DETAIL__UTILITIES_HPP_
 
-#include "rclcpp/detail/utilities.hpp"
-
 #include <string>
 #include <vector>
 
 #include "rcl/allocator.h"
 #include "rcl/arguments.h"
+#include "rclcpp/detail/utilities.hpp"
 
-namespace rclcpp
-{
-namespace detail
-{
+namespace rclcpp {
+namespace detail {
 
-std::vector<std::string>
-get_unparsed_ros_arguments(
-  int argc, char const * const * argv,
-  rcl_arguments_t * arguments,
-  rcl_allocator_t allocator);
+/**
+ * \brief 获取未解析的 ROS 参数 (Get unparsed ROS arguments)
+ * \param argc 参数个数 (Number of arguments)
+ * \param argv 参数字符串数组 (Argument string array)
+ * \param arguments 指向 rcl_arguments_t 结构体的指针，用于存储解析后的参数信息 (Pointer to
+ * rcl_arguments_t structure for storing parsed argument information) \param allocator
+ * 用于分配内存的 rcl_allocator_t 结构体 (rcl_allocator_t structure for memory allocation) \return
+ * 返回一个包含未解析参数的 std::vector<std::string> (Returns a std::vector<std::string> containing
+ * the unparsed arguments)
+ */
+std::vector<std::string> get_unparsed_ros_arguments(
+    int argc, char const* const* argv, rcl_arguments_t* arguments, rcl_allocator_t allocator);
 
 }  // namespace detail
 }  // namespace rclcpp

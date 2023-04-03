@@ -15,18 +15,18 @@
 #ifndef RCLCPP__TOPIC_STATISTICS_STATE_HPP_
 #define RCLCPP__TOPIC_STATISTICS_STATE_HPP_
 
-namespace rclcpp
-{
+namespace rclcpp {
 
-/// Represent the state of topic statistics collector.
-/// Used as argument in create_subscriber.
-enum class TopicStatisticsState
-{
-  /// Explicitly enable topic statistics at subscription level.
+/// \enum TopicStatisticsState
+/// \brief 代表主题统计收集器的状态。用作 create_subscriber 的参数。(Represents the state of topic
+/// statistics collector. Used as argument in create_subscriber.)
+enum class TopicStatisticsState {
+  /// \brief 在订阅级别显式启用主题统计。(Explicitly enable topic statistics at subscription level.)
   Enable,
-  /// Explicitly disable topic statistics at subscription level.
+  /// \brief 在订阅级别显式禁用主题统计。(Explicitly disable topic statistics at subscription
+  /// level.)
   Disable,
-  /// Take topic statistics state from the node.
+  /// \brief 从节点获取主题统计状态。(Take topic statistics state from the node.)
   NodeDefault
 };
 

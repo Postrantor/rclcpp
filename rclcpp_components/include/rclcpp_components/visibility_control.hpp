@@ -26,31 +26,31 @@
 //     https://gcc.gnu.org/wiki/Visibility
 
 #if defined _WIN32 || defined __CYGWIN__
-  #ifdef __GNUC__
-    #define RCLCPP_COMPONENTS_EXPORT __attribute__ ((dllexport))
-    #define RCLCPP_COMPONENTS_IMPORT __attribute__ ((dllimport))
-  #else
-    #define RCLCPP_COMPONENTS_EXPORT __declspec(dllexport)
-    #define RCLCPP_COMPONENTS_IMPORT __declspec(dllimport)
-  #endif
-  #ifdef RCLCPP_COMPONENTS_BUILDING_LIBRARY
-    #define RCLCPP_COMPONENTS_PUBLIC RCLCPP_COMPONENTS_EXPORT
-  #else
-    #define RCLCPP_COMPONENTS_PUBLIC RCLCPP_COMPONENTS_IMPORT
-  #endif
-  #define RCLCPP_COMPONENTS_PUBLIC_TYPE RCLCPP_COMPONENTS_PUBLIC
-  #define RCLCPP_COMPONENTS_LOCAL
+#ifdef __GNUC__
+#define RCLCPP_COMPONENTS_EXPORT __attribute__((dllexport))
+#define RCLCPP_COMPONENTS_IMPORT __attribute__((dllimport))
 #else
-  #define RCLCPP_COMPONENTS_EXPORT __attribute__ ((visibility("default")))
-  #define RCLCPP_COMPONENTS_IMPORT
-  #if __GNUC__ >= 4
-    #define RCLCPP_COMPONENTS_PUBLIC __attribute__ ((visibility("default")))
-    #define RCLCPP_COMPONENTS_LOCAL  __attribute__ ((visibility("hidden")))
-  #else
-    #define RCLCPP_COMPONENTS_PUBLIC
-    #define RCLCPP_COMPONENTS_LOCAL
-  #endif
-  #define RCLCPP_COMPONENTS_PUBLIC_TYPE
+#define RCLCPP_COMPONENTS_EXPORT __declspec(dllexport)
+#define RCLCPP_COMPONENTS_IMPORT __declspec(dllimport)
+#endif
+#ifdef RCLCPP_COMPONENTS_BUILDING_LIBRARY
+#define RCLCPP_COMPONENTS_PUBLIC RCLCPP_COMPONENTS_EXPORT
+#else
+#define RCLCPP_COMPONENTS_PUBLIC RCLCPP_COMPONENTS_IMPORT
+#endif
+#define RCLCPP_COMPONENTS_PUBLIC_TYPE RCLCPP_COMPONENTS_PUBLIC
+#define RCLCPP_COMPONENTS_LOCAL
+#else
+#define RCLCPP_COMPONENTS_EXPORT __attribute__((visibility("default")))
+#define RCLCPP_COMPONENTS_IMPORT
+#if __GNUC__ >= 4
+#define RCLCPP_COMPONENTS_PUBLIC __attribute__((visibility("default")))
+#define RCLCPP_COMPONENTS_LOCAL __attribute__((visibility("hidden")))
+#else
+#define RCLCPP_COMPONENTS_PUBLIC
+#define RCLCPP_COMPONENTS_LOCAL
+#endif
+#define RCLCPP_COMPONENTS_PUBLIC_TYPE
 #endif
 
 #endif  // RCLCPP_COMPONENTS__VISIBILITY_CONTROL_HPP_

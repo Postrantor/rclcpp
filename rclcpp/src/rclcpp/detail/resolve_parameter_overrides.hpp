@@ -15,8 +15,8 @@
 #ifndef RCLCPP__DETAIL__RESOLVE_PARAMETER_OVERRIDES_HPP_
 #define RCLCPP__DETAIL__RESOLVE_PARAMETER_OVERRIDES_HPP_
 
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
 
 #include "rcl/arguments.h"
@@ -29,16 +29,22 @@ namespace rclcpp
 {
 namespace detail
 {
-/// \internal Get the parameter overrides from the arguments.
+/// \internal
+/// \brief 获取参数覆盖值 (Get the parameter overrides from the arguments)
+/// \param[in] node_name 节点名称 (Node name)
+/// \param[in] parameter_overrides 参数覆盖集合 (Collection of parameter overrides)
+/// \param[in] local_args 本地参数 (Local arguments)
+/// \param[in] global_args 全局参数 (Global arguments)
+/// \return 返回一个映射，包含解析出的参数覆盖值 (Returns a map containing the resolved parameter overrides)
 RCLCPP_LOCAL
-std::map<std::string, rclcpp::ParameterValue>
-resolve_parameter_overrides(
-  const std::string & node_name,
-  const std::vector<rclcpp::Parameter> & parameter_overrides,
-  const rcl_arguments_t * local_args,
-  const rcl_arguments_t * global_args);
+std::map<std::string, rclcpp::ParameterValue> resolve_parameter_overrides(
+  const std::string & node_name, ///< 节点名称 (Node name)
+  const std::vector<rclcpp::Parameter> &
+    parameter_overrides,                ///< 参数覆盖集合 (Collection of parameter overrides)
+  const rcl_arguments_t * local_args,   ///< 本地参数 (Local arguments)
+  const rcl_arguments_t * global_args); ///< 全局参数 (Global arguments)
 
-}  // namespace detail
-}  // namespace rclcpp
+} // namespace detail
+} // namespace rclcpp
 
-#endif  // RCLCPP__DETAIL__RESOLVE_PARAMETER_OVERRIDES_HPP_
+#endif // RCLCPP__DETAIL__RESOLVE_PARAMETER_OVERRIDES_HPP_

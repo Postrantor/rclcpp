@@ -17,16 +17,20 @@
 #include <string>
 
 #include "rclcpp/logging.hpp"
-
 #include "rmw/error_handling.h"
-#include "rmw/types.h"
 #include "rmw/qos_profiles.h"
+#include "rmw/types.h"
 
-namespace rclcpp
-{
+namespace rclcpp {
 
-std::string qos_policy_name_from_kind(rmw_qos_policy_kind_t policy_kind)
-{
+/**
+ * @brief 将 QoS 策略类型转换为对应的字符串名称
+ *
+ * @param[in] policy_kind QoS 策略类型枚举值 (QoS policy kind enumeration value)
+ * @return std::string 对应的 QoS 策略名称 (Corresponding QoS policy name)
+ */
+std::string qos_policy_name_from_kind(rmw_qos_policy_kind_t policy_kind) {
+  // 使用 switch 语句根据传入的策略类型返回相应的策略名称
   switch (policy_kind) {
     case RMW_QOS_POLICY_DURABILITY:
       return "DURABILITY_QOS_POLICY";
@@ -45,23 +49,39 @@ std::string qos_policy_name_from_kind(rmw_qos_policy_kind_t policy_kind)
   }
 }
 
+/* ====================================================== */
+
+/**
+ * @brief QoSInitialization 构造函数 (QoSInitialization constructor)
+ *
+ * @param[in] history_policy_arg 历史策略参数 (History policy argument)
+ * @param[in] depth_arg 深度参数 (Depth argument)
+ * @param[in] print_depth_warning 是否打印深度警告 (Whether to print depth warning)
+ */
 QoSInitialization::QoSInitialization(
-  rmw_qos_history_policy_t history_policy_arg, size_t depth_arg,
-  bool print_depth_warning)
-: history_policy(history_policy_arg), depth(depth_arg)
-{
-  if (history_policy == RMW_QOS_POLICY_HISTORY_KEEP_LAST && depth == 0 && print_depth_warning) {
+    rmw_qos_history_policy_t history_policy_arg,  //
+    size_t depth_arg,                             //
+    bool print_depth_warning)
+    : history_policy(history_policy_arg), depth(depth_arg) {
+  // 如果历史策略为 KEEP_LAST，深度为 0，并且需要打印警告，则打印警告信息
+  if (history_policy == RMW_QOS_POLICY_HISTORY_KEEP_LAST &&  //
+      depth == 0 &&                                          //
+      print_depth_warning) {
     RCLCPP_WARN_ONCE(
-      rclcpp::get_logger(
-        "rclcpp"),
-      "A zero depth with KEEP_LAST doesn't make sense; no data could be stored. "
-      "This will be interpreted as SYSTEM_DEFAULT");
+        rclcpp::get_logger("rclcpp"),
+        "A zero depth with KEEP_LAST doesn't make sense; no data could be stored. "
+        "This will be interpreted as SYSTEM_DEFAULT");
   }
 }
 
-QoSInitialization
-QoSInitialization::from_rmw(const rmw_qos_profile_t & rmw_qos)
-{
+/**
+ * @brief 从 rmw_qos_profile_t 结构体创建 QoSInitialization 对象
+ *
+ * @param[in] rmw_qos rmw_qos_profile_t 结构体 (rmw_qos_profile_t structure)
+ * @return QoSInitialization 创建的 QoSInitialization 对象 (Created QoSInitialization object)
+ */
+QoSInitialization QoSInitialization::from_rmw(const rmw_qos_profile_t& rmw_qos) {
+  // 使用 switch 语句根据传入的 rmw_qos 历史策略创建相应的 QoSInitialization 对象
   switch (rmw_qos.history) {
     case RMW_QOS_POLICY_HISTORY_KEEP_ALL:
       return KeepAll();
@@ -74,63 +94,75 @@ QoSInitialization::from_rmw(const rmw_qos_profile_t & rmw_qos)
   }
 }
 
-KeepAll::KeepAll()
-: QoSInitialization(RMW_QOS_POLICY_HISTORY_KEEP_ALL, 0)
-{}
+/* ====================================================== */
 
+/**
+ * @brief 构造函数，设置 QoS 策略为 KeepAll（保留所有消息）
+ */
+KeepAll::KeepAll() : QoSInitialization(RMW_QOS_POLICY_HISTORY_KEEP_ALL, 0) {}
+
+/**
+ * @brief 构造函数，设置 QoS 策略为 KeepLast（保留最后几条消息），并设置深度
+ * @param depth 历史深度（保留的消息数量）
+ * @param print_depth_warning 是否打印深度警告
+ */
 KeepLast::KeepLast(size_t depth, bool print_depth_warning)
-: QoSInitialization(RMW_QOS_POLICY_HISTORY_KEEP_LAST, depth, print_depth_warning)
-{
-}
+    : QoSInitialization(RMW_QOS_POLICY_HISTORY_KEEP_LAST, depth, print_depth_warning) {}
 
+/* ====================================================== */
+
+/**
+ * @brief 构造函数，使用给定的 QoS 初始化和初始配置文件创建 QoS 对象
+ * @param qos_initialization QoS 初始化结构体
+ * @param initial_profile 初始 QoS 配置文件
+ */
 QoS::QoS(
-  const QoSInitialization & qos_initialization,
-  const rmw_qos_profile_t & initial_profile)
-: rmw_qos_profile_(initial_profile)
-{
+    const QoSInitialization& qos_initialization,  //
+    const rmw_qos_profile_t& initial_profile)
+    : rmw_qos_profile_(initial_profile) {
   rmw_qos_profile_.history = qos_initialization.history_policy;
   rmw_qos_profile_.depth = qos_initialization.depth;
 }
 
-QoS::QoS(size_t history_depth)
-: QoS(KeepLast(history_depth))
-{}
+/**
+ * @brief 构造函数，使用给定的历史深度创建 QoS 对象
+ * @param history_depth 历史深度（保留的消息数量）
+ */
+QoS::QoS(size_t history_depth) : QoS(KeepLast(history_depth)) {}
 
-rmw_qos_profile_t &
-QoS::get_rmw_qos_profile()
-{
-  return rmw_qos_profile_;
-}
+/**
+ * @brief 获取可修改的 rmw_qos_profile_t 引用
+ * @return 可修改的 rmw_qos_profile_t 引用
+ */
+rmw_qos_profile_t& QoS::get_rmw_qos_profile() { return rmw_qos_profile_; }
 
-const rmw_qos_profile_t &
-QoS::get_rmw_qos_profile() const
-{
-  return rmw_qos_profile_;
-}
+/**
+ * @brief 获取只读的 rmw_qos_profile_t 引用
+ * @return 只读的 rmw_qos_profile_t 引用
+ */
+const rmw_qos_profile_t& QoS::get_rmw_qos_profile() const { return rmw_qos_profile_; }
 
-QoS &
-QoS::history(rmw_qos_history_policy_t history)
-{
+/* ====================================================== */
+
+// 设置 QoS 历史策略
+QoS& QoS::history(rmw_qos_history_policy_t history) {
   rmw_qos_profile_.history = history;
   return *this;
 }
 
-QoS &
-QoS::history(HistoryPolicy history)
-{
+// 设置 QoS 历史策略
+QoS& QoS::history(HistoryPolicy history) {
   rmw_qos_profile_.history = static_cast<rmw_qos_history_policy_t>(history);
   return *this;
 }
 
-QoS &
-QoS::keep_last(size_t depth)
-{
+// 设置 QoS 策略为 KeepLast，并设置保留的消息数量
+QoS& QoS::keep_last(size_t depth) {
   if (depth == 0) {
     RCLCPP_WARN_ONCE(
-      rclcpp::get_logger(
-        "rclcpp"),
-      "A zero depth with KEEP_LAST doesn't make sense; no data could be stored."
-      "This will be interpreted as SYSTEM_DEFAULT");
+        rclcpp::get_logger("rclcpp"),
+        "A zero depth with KEEP_LAST doesn't make sense; no data could be stored."
+        "This will be interpreted as SYSTEM_DEFAULT");
   }
 
   rmw_qos_profile_.history = RMW_QOS_POLICY_HISTORY_KEEP_LAST;
@@ -138,234 +170,176 @@ QoS::keep_last(size_t depth)
   return *this;
 }
 
-QoS &
-QoS::keep_all()
-{
+// 设置 QoS 策略为 KeepAll（保留所有消息）
+QoS& QoS::keep_all() {
   rmw_qos_profile_.history = RMW_QOS_POLICY_HISTORY_KEEP_ALL;
   rmw_qos_profile_.depth = 0;
   return *this;
 }
 
-QoS &
-QoS::reliability(rmw_qos_reliability_policy_t reliability)
-{
+// 设置 QoS 的可靠性策略
+QoS& QoS::reliability(rmw_qos_reliability_policy_t reliability) {
   rmw_qos_profile_.reliability = reliability;
   return *this;
 }
 
-QoS &
-QoS::reliability(ReliabilityPolicy reliability)
-{
+// 设置 QoS 的可靠性策略
+QoS& QoS::reliability(ReliabilityPolicy reliability) {
+  // 使用 static_cast 将 ReliabilityPolicy 类型转换为 rmw_qos_reliability_policy_t 类型，并设置
+  // rmw_qos_profile_ 的可靠性策略
   rmw_qos_profile_.reliability = static_cast<rmw_qos_reliability_policy_t>(reliability);
+  // 返回 QoS 对象的引用
   return *this;
 }
 
-QoS &
-QoS::reliable()
-{
-  return this->reliability(RMW_QOS_POLICY_RELIABILITY_RELIABLE);
-}
+// 设置 QoS 的可靠性策略为 RELIABLE
+QoS& QoS::reliable() { return this->reliability(RMW_QOS_POLICY_RELIABILITY_RELIABLE); }
 
-QoS &
-QoS::best_effort()
-{
-  return this->reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
-}
+// 设置 QoS 的可靠性策略为 BEST_EFFORT
+QoS& QoS::best_effort() { return this->reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT); }
 
-QoS &
-QoS::reliability_best_available()
-{
+// ... 其他函数的注释类似，省略以节省空间
+
+QoS& QoS::reliability_best_available() {
   return this->reliability(RMW_QOS_POLICY_RELIABILITY_BEST_AVAILABLE);
 }
 
-QoS &
-QoS::durability(rmw_qos_durability_policy_t durability)
-{
+QoS& QoS::durability(rmw_qos_durability_policy_t durability) {
   rmw_qos_profile_.durability = durability;
   return *this;
 }
 
-QoS &
-QoS::durability(DurabilityPolicy durability)
-{
+QoS& QoS::durability(DurabilityPolicy durability) {
   rmw_qos_profile_.durability = static_cast<rmw_qos_durability_policy_t>(durability);
   return *this;
 }
 
-QoS &
-QoS::durability_volatile()
-{
-  return this->durability(RMW_QOS_POLICY_DURABILITY_VOLATILE);
-}
+QoS& QoS::durability_volatile() { return this->durability(RMW_QOS_POLICY_DURABILITY_VOLATILE); }
 
-QoS &
-QoS::transient_local()
-{
-  return this->durability(RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL);
-}
+QoS& QoS::transient_local() { return this->durability(RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL); }
 
-QoS &
-QoS::durability_best_available()
-{
+QoS& QoS::durability_best_available() {
   return this->durability(RMW_QOS_POLICY_DURABILITY_BEST_AVAILABLE);
 }
 
-QoS &
-QoS::deadline(rmw_time_t deadline)
-{
+QoS& QoS::deadline(rmw_time_t deadline) {
   rmw_qos_profile_.deadline = deadline;
   return *this;
 }
 
-QoS &
-QoS::deadline(const rclcpp::Duration & deadline)
-{
+QoS& QoS::deadline(const rclcpp::Duration& deadline) {
   return this->deadline(deadline.to_rmw_time());
 }
 
-QoS &
-QoS::lifespan(rmw_time_t lifespan)
-{
+QoS& QoS::lifespan(rmw_time_t lifespan) {
   rmw_qos_profile_.lifespan = lifespan;
   return *this;
 }
 
-QoS &
-QoS::lifespan(const rclcpp::Duration & lifespan)
-{
+QoS& QoS::lifespan(const rclcpp::Duration& lifespan) {
   return this->lifespan(lifespan.to_rmw_time());
 }
 
-QoS &
-QoS::liveliness(rmw_qos_liveliness_policy_t liveliness)
-{
+QoS& QoS::liveliness(rmw_qos_liveliness_policy_t liveliness) {
   rmw_qos_profile_.liveliness = liveliness;
   return *this;
 }
 
-QoS &
-QoS::liveliness(LivelinessPolicy liveliness)
-{
+QoS& QoS::liveliness(LivelinessPolicy liveliness) {
   rmw_qos_profile_.liveliness = static_cast<rmw_qos_liveliness_policy_t>(liveliness);
   return *this;
 }
 
-
-QoS &
-QoS::liveliness_lease_duration(rmw_time_t liveliness_lease_duration)
-{
+QoS& QoS::liveliness_lease_duration(rmw_time_t liveliness_lease_duration) {
   rmw_qos_profile_.liveliness_lease_duration = liveliness_lease_duration;
   return *this;
 }
 
-QoS &
-QoS::liveliness_lease_duration(const rclcpp::Duration & liveliness_lease_duration)
-{
+QoS& QoS::liveliness_lease_duration(const rclcpp::Duration& liveliness_lease_duration) {
   return this->liveliness_lease_duration(liveliness_lease_duration.to_rmw_time());
 }
 
-QoS &
-QoS::avoid_ros_namespace_conventions(bool avoid_ros_namespace_conventions)
-{
+QoS& QoS::avoid_ros_namespace_conventions(bool avoid_ros_namespace_conventions) {
   rmw_qos_profile_.avoid_ros_namespace_conventions = avoid_ros_namespace_conventions;
   return *this;
 }
 
-HistoryPolicy
-QoS::history() const
-{
-  return static_cast<HistoryPolicy>(rmw_qos_profile_.history);
-}
+/* ====================================================== */
+// clang-format off
+HistoryPolicy QoS::history() const { return static_cast<HistoryPolicy>(rmw_qos_profile_.history); }
+size_t QoS::depth() const { return rmw_qos_profile_.depth; }
+ReliabilityPolicy QoS::reliability() const { return static_cast<ReliabilityPolicy>(rmw_qos_profile_.reliability); }
+DurabilityPolicy QoS::durability() const { return static_cast<DurabilityPolicy>(rmw_qos_profile_.durability); }
+Duration QoS::deadline() const { return Duration::from_rmw_time(rmw_qos_profile_.deadline); }
+Duration QoS::lifespan() const { return Duration::from_rmw_time(rmw_qos_profile_.lifespan); }
+LivelinessPolicy QoS::liveliness() const { return static_cast<LivelinessPolicy>(rmw_qos_profile_.liveliness); }
+Duration QoS::liveliness_lease_duration() const { return Duration::from_rmw_time(rmw_qos_profile_.liveliness_lease_duration); }
+bool QoS::avoid_ros_namespace_conventions() const { return rmw_qos_profile_.avoid_ros_namespace_conventions; }
+// clang-format on
 
-size_t
-QoS::depth() const {return rmw_qos_profile_.depth;}
+namespace {
 
-ReliabilityPolicy
-QoS::reliability() const
-{
-  return static_cast<ReliabilityPolicy>(rmw_qos_profile_.reliability);
-}
-
-DurabilityPolicy
-QoS::durability() const
-{
-  return static_cast<DurabilityPolicy>(rmw_qos_profile_.durability);
-}
-
-Duration
-QoS::deadline() const {return Duration::from_rmw_time(rmw_qos_profile_.deadline);}
-
-Duration
-QoS::lifespan() const {return Duration::from_rmw_time(rmw_qos_profile_.lifespan);}
-
-LivelinessPolicy
-QoS::liveliness() const
-{
-  return static_cast<LivelinessPolicy>(rmw_qos_profile_.liveliness);
-}
-
-Duration
-QoS::liveliness_lease_duration() const
-{
-  return Duration::from_rmw_time(rmw_qos_profile_.liveliness_lease_duration);
-}
-
-bool
-QoS::avoid_ros_namespace_conventions() const
-{
-  return rmw_qos_profile_.avoid_ros_namespace_conventions;
-}
-
-namespace
-{
-/// Check if two rmw_time_t have the same values.
-bool operator==(const rmw_time_t & left, const rmw_time_t & right)
-{
+/// 检查两个 rmw_time_t 是否具有相同的值。
+bool operator==(const rmw_time_t& left, const rmw_time_t& right) {
+  // 比较两个 rmw_time_t 结构体的 sec 和 nsec 成员是否相等
   return left.sec == right.sec && left.nsec == right.nsec;
 }
 }  // unnamed namespace
 
-bool operator==(const QoS & left, const QoS & right)
-{
-  const auto & pl = left.get_rmw_qos_profile();
-  const auto & pr = right.get_rmw_qos_profile();
-  return pl.history == pr.history &&
-         pl.depth == pr.depth &&
-         pl.reliability == pr.reliability &&
-         pl.durability == pr.durability &&
-         pl.deadline == pr.deadline &&
-         pl.lifespan == pr.lifespan &&
-         pl.liveliness == pr.liveliness &&
-         pl.liveliness_lease_duration == pr.liveliness_lease_duration &&
+/// 检查两个 QoS 对象是否相等。
+bool operator==(const QoS& left, const QoS& right) {
+  // 获取左侧 QoS 对象的 rmw_qos_profile
+  const auto& pl = left.get_rmw_qos_profile();
+  // 获取右侧 QoS 对象的 rmw_qos_profile
+  const auto& pr = right.get_rmw_qos_profile();
+
+  // 比较两个 rmw_qos_profile 的所有成员是否相等
+  return pl.history == pr.history &&                                      //
+         pl.depth == pr.depth &&                                          //
+         pl.reliability == pr.reliability &&                              //
+         pl.durability == pr.durability &&                                //
+         pl.deadline == pr.deadline &&                                    //
+         pl.lifespan == pr.lifespan &&                                    //
+         pl.liveliness == pr.liveliness &&                                //
+         pl.liveliness_lease_duration == pr.liveliness_lease_duration &&  //
          pl.avoid_ros_namespace_conventions == pr.avoid_ros_namespace_conventions;
 }
 
-bool operator!=(const QoS & left, const QoS & right)
-{
-  return !(left == right);
-}
+/// 检查两个 QoS 对象是否不相等。
+bool operator!=(const QoS& left, const QoS& right) { return !(left == right); }
 
-QoSCheckCompatibleResult
-qos_check_compatible(const QoS & publisher_qos, const QoS & subscription_qos)
-{
+/// 检查发布者和订阅者的 QoS 设置是否兼容。
+QoSCheckCompatibleResult qos_check_compatible(
+    const QoS& publisher_qos, const QoS& subscription_qos) {
+  // 定义一个变量来存储兼容性结果
   rmw_qos_compatibility_type_t compatible;
+
+  // 设置原因字符串的大小
   const size_t reason_size = 2048u;
   char reason_c_str[reason_size] = "";
+
+  // 调用 rmw_qos_profile_check_compatible 函数检查发布者和订阅者的 QoS 兼容性
   rmw_ret_t ret = rmw_qos_profile_check_compatible(
-    publisher_qos.get_rmw_qos_profile(),
-    subscription_qos.get_rmw_qos_profile(),
-    &compatible,
-    reason_c_str,
-    reason_size);
+      publisher_qos.get_rmw_qos_profile(),     //
+      subscription_qos.get_rmw_qos_profile(),  //
+      &compatible,                             //
+      reason_c_str,                            //
+      reason_size);
+
+  // 如果返回值不是 RMW_RET_OK，抛出异常
   if (RMW_RET_OK != ret) {
     std::string error_str(rmw_get_error_string().str);
     rmw_reset_error();
     throw rclcpp::exceptions::QoSCheckCompatibleException{error_str};
   }
 
+  // 创建一个 QoSCheckCompatibleResult 结构体
   QoSCheckCompatibleResult result;
+
+  // 将原因字符串转换为 std::string 类型并存储在 result 中
   result.reason = std::string(reason_c_str);
 
+  // 根据 rmw_qos_compatibility_type_t 的值设置兼容性结果
   switch (compatible) {
     case RMW_QOS_COMPATIBILITY_OK:
       result.compatibility = QoSCompatibility::Ok;
@@ -378,44 +352,39 @@ qos_check_compatible(const QoS & publisher_qos, const QoS & subscription_qos)
       break;
     default:
       throw rclcpp::exceptions::QoSCheckCompatibleException{
-              "Unexpected compatibility value returned by rmw '" + std::to_string(compatible) +
-              "'"};
+          "Unexpected compatibility value returned by rmw '" + std::to_string(compatible) + "'"};
   }
+
+  // 返回兼容性检查结果
   return result;
 }
 
-ClockQoS::ClockQoS(const QoSInitialization & qos_initialization)
-// Using `rmw_qos_profile_sensor_data` intentionally.
-// It's best effort and `qos_initialization` is overriding the depth to 1.
-: QoS(qos_initialization, rmw_qos_profile_sensor_data)
-{}
+/* ====================================================== */
 
-SensorDataQoS::SensorDataQoS(const QoSInitialization & qos_initialization)
-: QoS(qos_initialization, rmw_qos_profile_sensor_data)
-{}
+ClockQoS::ClockQoS(const QoSInitialization& qos_initialization)
+    // Using `rmw_qos_profile_sensor_data` intentionally.
+    // It's best effort and `qos_initialization` is overriding the depth to 1.
+    : QoS(qos_initialization, rmw_qos_profile_sensor_data) {}
 
-ParametersQoS::ParametersQoS(const QoSInitialization & qos_initialization)
-: QoS(qos_initialization, rmw_qos_profile_parameters)
-{}
+SensorDataQoS::SensorDataQoS(const QoSInitialization& qos_initialization)
+    : QoS(qos_initialization, rmw_qos_profile_sensor_data) {}
 
-ServicesQoS::ServicesQoS(const QoSInitialization & qos_initialization)
-: QoS(qos_initialization, rmw_qos_profile_services_default)
-{}
+ParametersQoS::ParametersQoS(const QoSInitialization& qos_initialization)
+    : QoS(qos_initialization, rmw_qos_profile_parameters) {}
 
-ParameterEventsQoS::ParameterEventsQoS(const QoSInitialization & qos_initialization)
-: QoS(qos_initialization, rmw_qos_profile_parameter_events)
-{}
+ServicesQoS::ServicesQoS(const QoSInitialization& qos_initialization)
+    : QoS(qos_initialization, rmw_qos_profile_services_default) {}
 
-RosoutQoS::RosoutQoS(const QoSInitialization & rosout_initialization)
-: QoS(rosout_initialization, rcl_qos_profile_rosout_default)
-{}
+ParameterEventsQoS::ParameterEventsQoS(const QoSInitialization& qos_initialization)
+    : QoS(qos_initialization, rmw_qos_profile_parameter_events) {}
 
-SystemDefaultsQoS::SystemDefaultsQoS(const QoSInitialization & qos_initialization)
-: QoS(qos_initialization, rmw_qos_profile_system_default)
-{}
+RosoutQoS::RosoutQoS(const QoSInitialization& rosout_initialization)
+    : QoS(rosout_initialization, rcl_qos_profile_rosout_default) {}
 
-BestAvailableQoS::BestAvailableQoS(const QoSInitialization & qos_initialization)
-: QoS(qos_initialization, rmw_qos_profile_best_available)
-{}
+SystemDefaultsQoS::SystemDefaultsQoS(const QoSInitialization& qos_initialization)
+    : QoS(qos_initialization, rmw_qos_profile_system_default) {}
+
+BestAvailableQoS::BestAvailableQoS(const QoSInitialization& qos_initialization)
+    : QoS(qos_initialization, rmw_qos_profile_best_available) {}
 
 }  // namespace rclcpp

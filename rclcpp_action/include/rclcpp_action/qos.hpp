@@ -19,13 +19,33 @@
 
 #include "rclcpp_action/visibility_control.hpp"
 
-namespace rclcpp_action
-{
+namespace rclcpp_action {
 
-class DefaultActionStatusQoS : public rclcpp::QoS
-{
+/**
+ * @class DefaultActionStatusQoS
+ * @brief 默认动作状态服务质量类 (Default action status Quality of Service class)
+ *
+ * 这个类继承了 rclcpp::QoS，用于设置默认的动作状态服务质量。
+ * (This class inherits from rclcpp::QoS and is used to set the default action status Quality of
+ * Service.)
+ */
+class DefaultActionStatusQoS : public rclcpp::QoS {
 public:
+  /**
+   * @brief 导出符号 (Export symbol)
+   *
+   * RCLCPP_ACTION_PUBLIC 是一个宏，用于在 Windows 系统上导出符号以供其他模块使用。
+   * (RCLCPP_ACTION_PUBLIC is a macro for exporting symbols on Windows systems for use in other
+   * modules.)
+   */
   RCLCPP_ACTION_PUBLIC
+
+  /**
+   * @brief 构造函数 (Constructor)
+   *
+   * DefaultActionStatusQoS 的构造函数，用于创建 DefaultActionStatusQoS 对象。
+   * (The constructor for DefaultActionStatusQoS, used to create a DefaultActionStatusQoS object.)
+   */
   DefaultActionStatusQoS();
 };
 

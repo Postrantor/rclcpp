@@ -20,39 +20,58 @@
 
 using rclcpp::node_interfaces::NodeTimers;
 
-NodeTimers::NodeTimers(rclcpp::node_interfaces::NodeBaseInterface * node_base)
-: node_base_(node_base)
+/**
+ * @brief 构造函数，初始化节点定时器 (Constructor, initializes the node timer)
+ *
+ * @param node_base 指向节点基础接口的指针 (Pointer to the NodeBaseInterface)
+ */
+NodeTimers::NodeTimers(rclcpp::node_interfaces::NodeBaseInterface *node_base)
+    : node_base_(node_base)  // 初始化节点基础接口 (Initialize the node base interface)
 {}
 
-NodeTimers::~NodeTimers()
-{}
+/**
+ * @brief 析构函数 (Destructor)
+ */
+NodeTimers::~NodeTimers() {}
 
-void
-NodeTimers::add_timer(
-  rclcpp::TimerBase::SharedPtr timer,
-  rclcpp::CallbackGroup::SharedPtr callback_group)
-{
+/**
+ * @brief 添加一个定时器到回调组中 (Add a timer to the callback group)
+ *
+ * @param timer 定时器共享指针 (Shared pointer to the timer)
+ * @param callback_group 回调组共享指针 (Shared pointer to the callback group)
+ */
+void NodeTimers::add_timer(
+    rclcpp::TimerBase::SharedPtr timer, rclcpp::CallbackGroup::SharedPtr callback_group) {
+  // 判断回调组是否存在 (Check if the callback group exists)
   if (callback_group) {
+    // 判断回调组是否在节点中 (Check if the callback group is in the node)
     if (!node_base_->callback_group_in_node(callback_group)) {
-      // TODO(jacquelinekay): use custom exception
+      // 抛出异常 (Throw an exception)
       throw std::runtime_error("Cannot create timer, group not in node.");
     }
   } else {
+    // 获取默认回调组 (Get the default callback group)
     callback_group = node_base_->get_default_callback_group();
   }
+
+  // 向回调组中添加定时器 (Add the timer to the callback group)
   callback_group->add_timer(timer);
 
-  auto & node_gc = node_base_->get_notify_guard_condition();
+  // 获取通知保护条件 (Get the notify guard condition)
+  auto &node_gc = node_base_->get_notify_guard_condition();
+
+  // 触发通知保护条件 (Trigger the notify guard condition)
   try {
     node_gc.trigger();
     callback_group->trigger_notify_guard_condition();
-  } catch (const rclcpp::exceptions::RCLError & ex) {
+  } catch (const rclcpp::exceptions::RCLError &ex) {
+    // 抛出异常 (Throw an exception)
     throw std::runtime_error(
-            std::string("failed to notify wait set on timer creation: ") + ex.what());
+        std::string("failed to notify wait set on timer creation: ") + ex.what());
   }
 
+  // 添加跟踪点 (Add a tracepoint)
   TRACEPOINT(
-    rclcpp_timer_link_node,
-    static_cast<const void *>(timer->get_timer_handle().get()),
-    static_cast<const void *>(node_base_->get_rcl_node_handle()));
+      rclcpp_timer_link_node, static_cast<const void *>(timer->get_timer_handle().get()),
+      static_cast<const void *>(node_base_->get_rcl_node_handle()));
 }

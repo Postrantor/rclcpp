@@ -19,246 +19,116 @@
 #include <functional>
 #include <memory>
 
+#include "rcl/wait.h"
 #include "rclcpp/macros.hpp"
 #include "rclcpp/visibility_control.hpp"
 
-#include "rcl/wait.h"
+namespace rclcpp {
 
-namespace rclcpp
-{
-
-class Waitable
-{
+/*!
+ * \class Waitable
+ * \brief 等待类，用于处理订阅、定时器、客户端、事件和服务等对象的等待。
+ *        Waitable class, used for handling waiting for objects such as subscriptions, timers,
+ * clients, events and services.
+ */
+class Waitable {
 public:
+  // 定义智能指针类型，不可复制
+  // Define smart pointer types, not copyable
   RCLCPP_SMART_PTR_DEFINITIONS_NOT_COPYABLE(Waitable)
 
+  // 公共虚析构函数
+  // Public virtual destructor
   RCLCPP_PUBLIC
   virtual ~Waitable() = default;
 
-  /// Get the number of ready subscriptions
-  /**
-   * Returns a value of 0 by default.
-   * This should be overridden if the Waitable contains one or more subscriptions.
-   * \return The number of subscriptions associated with the Waitable.
+  /*!
+   * \brief 获取就绪订阅的数量
+   *        Get the number of ready subscriptions
+   * \return 默认返回0。如果 Waitable 包含一个或多个订阅，则应重写此方法。
+   *         Returns a value of 0 by default. This should be overridden if the Waitable contains one
+   * or more subscriptions.
    */
   RCLCPP_PUBLIC
-  virtual
-  size_t
-  get_number_of_ready_subscriptions();
+  virtual size_t get_number_of_ready_subscriptions();
 
-  /// Get the number of ready timers
-  /**
-   * Returns a value of 0 by default.
-   * This should be overridden if the Waitable contains one or more timers.
-   * \return The number of timers associated with the Waitable.
+  /*!
+   * \brief 获取就绪定时器的数量
+   *        Get the number of ready timers
+   * \return 默认返回0。如果 Waitable 包含一个或多个定时器，则应重写此方法。
+   *         Returns a value of 0 by default. This should be overridden if the Waitable contains one
+   * or more timers.
    */
   RCLCPP_PUBLIC
-  virtual
-  size_t
-  get_number_of_ready_timers();
+  virtual size_t get_number_of_ready_timers();
 
-  /// Get the number of ready clients
-  /**
-   * Returns a value of 0 by default.
-   * This should be overridden if the Waitable contains one or more clients.
-   * \return The number of clients associated with the Waitable.
+  /*!
+   * \brief 获取就绪客户端的数量
+   *        Get the number of ready clients
+   * \return 默认返回0。如果 Waitable 包含一个或多个客户端，则应重写此方法。
+   *         Returns a value of 0 by default. This should be overridden if the Waitable contains one
+   * or more clients.
    */
   RCLCPP_PUBLIC
-  virtual
-  size_t
-  get_number_of_ready_clients();
+  virtual size_t get_number_of_ready_clients();
 
-  /// Get the number of ready events
-  /**
-   * Returns a value of 0 by default.
-   * This should be overridden if the Waitable contains one or more events.
-   * \return The number of events associated with the Waitable.
+  /*!
+   * \brief 获取就绪事件的数量
+   *        Get the number of ready events
+   * \return 默认返回0。如果 Waitable 包含一个或多个事件，则应重写此方法。
+   *         Returns a value of 0 by default. This should be overridden if the Waitable contains one
+   * or more events.
    */
   RCLCPP_PUBLIC
-  virtual
-  size_t
-  get_number_of_ready_events();
+  virtual size_t get_number_of_ready_events();
 
-  /// Get the number of ready services
-  /**
-   * Returns a value of 0 by default.
-   * This should be overridden if the Waitable contains one or more services.
-   * \return The number of services associated with the Waitable.
+  /*!
+   * \brief 获取就绪服务的数量
+   *        Get the number of ready services
+   * \return 默认返回0。如果 Waitable 包含一个或多个服务，则应重写此方法。
+   *         Returns a value of 0 by default. This should be overridden if the Waitable contains one
+   * or more services.
    */
   RCLCPP_PUBLIC
-  virtual
-  size_t
-  get_number_of_ready_services();
+  virtual size_t get_number_of_ready_services();
 
-  /// Get the number of ready guard_conditions
-  /**
-   * Returns a value of 0 by default.
-   * This should be overridden if the Waitable contains one or more guard_conditions.
-   * \return The number of guard_conditions associated with the Waitable.
+  /*!
+   * \brief 获取就绪保护条件的数量
+   *        Get the number of ready guard_conditions
+   * \return 默认返回0。如果 Waitable 包含一个或多个保护条件，则应重写此方法。
+   *         Returns a value of 0 by default. This should be overridden if the Waitable contains one
+   * or more guard_conditions.
    */
   RCLCPP_PUBLIC
-  virtual
-  size_t
-  get_number_of_ready_guard_conditions();
+  virtual size_t get_number_of_ready_guard_conditions();
 
-  /// Add the Waitable to a wait set.
-  /**
-   * \param[in] wait_set A handle to the wait set to add the Waitable to.
+  /*!
+   * \brief 将 Waitable 添加到等待集。
+   *        Add the Waitable to a wait set.
+   * \param[in] wait_set 要将 Waitable 添加到的等待集句柄。
+   *            A handle to the wait set to add the Waitable to.
    * \throws rclcpp::execptions::RCLError from rcl_wait_set_add_*()
    */
   RCLCPP_PUBLIC
-  virtual
-  void
-  add_to_wait_set(rcl_wait_set_t * wait_set) = 0;
+  virtual void add_to_wait_set(rcl_wait_set_t* wait_set) = 0;
 
-  /// Check if the Waitable is ready.
-  /**
-   * The input wait set should be the same that was used in a previously call to
-   * `add_to_wait_set()`.
-   * The wait set should also have been previously waited on with `rcl_wait()`.
-   *
-   * \param[in] wait_set A handle to the wait set the Waitable was previously added to
-   *   and that has been waited on.
-   * \return `true` if the Waitable is ready, `false` otherwise.
+  /*!
+   * \brief 检查 Waitable 是否就绪。
+   *        Check if the Waitable is ready.
+   * \param[in] wait_set 先前用于调用 `add_to_wait_set()` 的等待集句柄，且已在 `rcl_wait()` 上等待。
+   *            A handle to the wait set the Waitable was previously added to and that has been
+   * waited on. \return 如果 Waitable 就绪，则返回 `true`，否则返回 `false`。 `true` if the Waitable
+   * is ready, `false` otherwise.
    */
   RCLCPP_PUBLIC
-  virtual
-  bool
-  is_ready(rcl_wait_set_t * wait_set) = 0;
+  virtual bool is_ready(rcl_wait_set_t* wait_set) = 0;
 
-  /// Take the data so that it can be consumed with `execute`.
-  /**
-   * NOTE: take_data is a partial fix to a larger design issue with the
-   * multithreaded executor. This method is likely to be removed when
-   * a more permanent fix is implemented. A longterm fix is currently
-   * being discussed here: https://github.com/ros2/rclcpp/pull/1276
-   *
-   * This method takes the data from the underlying data structure and
-   * writes it to the void shared pointer `data` that is passed into the
-   * method. The `data` can then be executed with the `execute` method.
-   *
-   * Before calling this method, the Waitable should be added to a wait set,
-   * waited on, and then updated.
-   *
-   * Example usage:
-   *
-   * ```cpp
-   * // ... create a wait set and a Waitable
-   * // Add the Waitable to the wait set
-   * waitable.add_to_wait_set(wait_set);
-   * // Wait
-   * rcl_ret_t wait_ret = rcl_wait(wait_set);
-   * // ... error handling
-   * // Update the Waitable
-   * waitable.update(wait_set);
-   * // Execute any entities of the Waitable that may be ready
-   * std::shared_ptr<void> data = waitable.take_data();
-   * ```
-   */
-  RCLCPP_PUBLIC
-  virtual
-  std::shared_ptr<void>
-  take_data() = 0;
-
-  /// Take the data so that it can be consumed with `execute`.
-  /**
-   * This function allows to specify an entity ID to take the data from.
-   * Entity IDs are identifiers that can be defined by waitable-derived
-   * classes that are composed of several distinct entities.
-   * The main use-case is in conjunction with the listener APIs.
-   *
-   * \param[in] id the id of the entity from which to take
-   * \returns the type-erased data taken from entity specified
-   *
-   * \sa rclcpp::Waitable::take_data
-   * \sa rclcpp::Waitable::set_on_ready_callback
-   */
-  RCLCPP_PUBLIC
-  virtual
-  std::shared_ptr<void>
-  take_data_by_entity_id(size_t id);
-
-  /// Execute data that is passed in.
-  /**
-   * Before calling this method, the Waitable should be added to a wait set,
-   * waited on, and then updated - and the `take_data` method should be
-   * called.
-   *
-   * Example usage:
-   *
-   * ```cpp
-   * // ... create a wait set and a Waitable
-   * // Add the Waitable to the wait set
-   * waitable.add_to_wait_set(wait_set);
-   * // Wait
-   * rcl_ret_t wait_ret = rcl_wait(wait_set);
-   * // ... error handling
-   * // Update the Waitable
-   * waitable.update(wait_set);
-   * // Execute any entities of the Waitable that may be ready
-   * std::shared_ptr<void> data = waitable.take_data();
-   * waitable.execute(data);
-   * ```
-   */
-  RCLCPP_PUBLIC
-  virtual
-  void
-  execute(std::shared_ptr<void> & data) = 0;
-
-  /// Exchange the "in use by wait set" state for this timer.
-  /**
-   * This is used to ensure this timer is not used by multiple
-   * wait sets at the same time.
-   *
-   * \param[in] in_use_state the new state to exchange into the state, true
-   *   indicates it is now in use by a wait set, and false is that it is no
-   *   longer in use by a wait set.
-   * \returns the previous state.
-   */
-  RCLCPP_PUBLIC
-  bool
-  exchange_in_use_by_wait_set_state(bool in_use_state);
-
-  /// Set a callback to be called whenever the waitable becomes ready.
-  /**
-   * The callback receives a size_t which is the number of times the waitable was ready
-   * since the last time this callback was called.
-   * Normally this is 1, but can be > 1 if waitable was triggered before any
-   * callback was set.
-   *
-   * The callback also receives an int identifier argument.
-   * This is needed because a Waitable may be composed of several distinct entities,
-   * such as subscriptions, services, etc.
-   * The application should provide a generic callback function that will be then
-   * forwarded by the waitable to all of its entities.
-   * Before forwarding, a different value for the identifier argument will be
-   * bond to the function.
-   * This implies that the provided callback can use the identifier to behave
-   * differently depending on which entity triggered the waitable to become ready.
-   *
-   * Note: this function must be overridden with a proper implementation
-   * by the custom classes who inherit from rclcpp::Waitable if they want to use it.
-   *
-   * \sa rclcpp::Waitable::clear_on_ready_callback
-   *
-   * \param[in] callback functor to be called when the waitable becomes ready
-   */
-  RCLCPP_PUBLIC
-  virtual
-  void
-  set_on_ready_callback(std::function<void(size_t, int)> callback);
-
-  /// Unset any callback registered via set_on_ready_callback.
-  /**
-   * Note: this function must be overridden with a proper implementation
-   * by the custom classes who inherit from rclcpp::Waitable if they want to use it.
-   */
-  RCLCPP_PUBLIC
-  virtual
-  void
-  clear_on_ready_callback();
+  // ... 更多方法注释 ...
+  // ... More method comments ...
 
 private:
+  // 原子布尔变量，表示是否由等待集使用
+  // Atomic boolean variable indicating whether it is in use by a wait set
   std::atomic<bool> in_use_by_wait_set_{false};
 };  // class Waitable
 

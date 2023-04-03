@@ -17,21 +17,21 @@
 
 #include "rclcpp/guard_condition.hpp"
 
-namespace rclcpp
-{
-namespace detail
-{
+namespace rclcpp {
+namespace detail {
 
-/// Adds the guard condition to a waitset
+/// 添加守护条件到等待集 (Adds the guard condition to a waitset)
 /**
- * \param[in] wait_set reference to a wait set where to add the guard condition
- * \param[in] guard_condition reference to the guard_condition to be added
+ * \param[in] wait_set 引用要添加守护条件的等待集 (reference to a wait set where to add the guard
+ * condition) \param[in] guard_condition 要添加的守护条件引用 (reference to the guard_condition to
+ * be added)
  */
 RCLCPP_PUBLIC
-void
-add_guard_condition_to_rcl_wait_set(
-  rcl_wait_set_t & wait_set,
-  const rclcpp::GuardCondition & guard_condition);
+void add_guard_condition_to_rcl_wait_set(
+    rcl_wait_set_t& wait_set,  // 等待集引用，我们将在此等待集中添加守护条件 (reference to the wait
+                               // set where we will add the guard condition)
+    const rclcpp::GuardCondition& guard_condition);  // 要添加的守护条件引用 (reference to the guard
+                                                     // condition that we want to add)
 
 }  // namespace detail
 }  // namespace rclcpp

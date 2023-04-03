@@ -17,18 +17,21 @@
 
 #include "rclcpp/visibility_control.hpp"
 
-namespace rclcpp
-{
+namespace rclcpp {
 
-/// Options used to determine what parts of a subscription get added to or removed from a wait set.
-class RCLCPP_PUBLIC SubscriptionWaitSetMask
-{
+/// \brief 用于确定订阅的哪些部分被添加到等待集或从中删除的选项（Options used to determine what
+/// parts of a subscription get added to or removed from a wait set.）
+class RCLCPP_PUBLIC SubscriptionWaitSetMask {
 public:
-  /// If true, include the actual subscription.
+  /// \brief 如果为真，则包含实际订阅。（If true, include the actual subscription.）
   bool include_subscription = true;
-  /// If true, include any events attached to the subscription.
+
+  /// \brief 如果为真，则包括附加到订阅的任何事件。（If true, include any events attached to the
+  /// subscription.）
   bool include_events = true;
-  /// If true, include the waitable used to handle intra process communication.
+
+  /// \brief 如果为真，则包括用于处理进程内通信的可等待对象。（If true, include the waitable used to
+  /// handle intra process communication.）
   bool include_intra_process_waitable = true;
 };
 

@@ -20,74 +20,90 @@
 #include <vector>
 
 #include "./signal_handler.hpp"
+#include "rcl/error_handling.h"
+#include "rcl/rcl.h"
 #include "rclcpp/contexts/default_context.hpp"
 #include "rclcpp/detail/utilities.hpp"
 #include "rclcpp/exceptions.hpp"
 
-#include "rcl/error_handling.h"
-#include "rcl/rcl.h"
+namespace rclcpp {
 
-namespace rclcpp
-{
-
-void
-init(
-  int argc,
-  char const * const * argv,
-  const InitOptions & init_options,
-  SignalHandlerOptions signal_handler_options)
-{
+/*!
+ * \brief 初始化 ROS2 节点 (Initialize the ROS2 node)
+ *
+ * \param[in] argc 命令行参数的数量 (Number of command line arguments)
+ * \param[in] argv 命令行参数的数组 (Array of command line arguments)
+ * \param[in] init_options 初始化选项对象 (Initialization options object)
+ * \param[in] signal_handler_options 信号处理器选项对象 (Signal handler options object)
+ */
+void init(
+    int argc,
+    char const *const *argv,
+    const InitOptions &init_options,
+    SignalHandlerOptions signal_handler_options) {
+  // 获取全局默认上下文 (Get the global default context)
   using rclcpp::contexts::get_global_default_context;
   get_global_default_context()->init(argc, argv, init_options);
-  // Install the signal handlers.
+
+  // 安装信号处理器 (Install the signal handlers)
   install_signal_handlers(signal_handler_options);
 }
 
-bool
-install_signal_handlers(SignalHandlerOptions signal_handler_options)
-{
+/*!
+ * \brief 安装信号处理器 (Install signal handlers)
+ *
+ * \param[in] signal_handler_options 信号处理器选项对象 (Signal handler options object)
+ * \return 是否成功安装信号处理器 (Whether the signal handlers were successfully installed)
+ */
+bool install_signal_handlers(SignalHandlerOptions signal_handler_options) {
   return SignalHandler::get_global_signal_handler().install(signal_handler_options);
 }
 
-bool
-signal_handlers_installed()
-{
+/*!
+ * \brief 检查信号处理器是否已安装 (Check if signal handlers are installed)
+ *
+ * \return 信号处理器是否已安装 (Whether the signal handlers are installed)
+ */
+bool signal_handlers_installed() {
   return SignalHandler::get_global_signal_handler().is_installed();
 }
 
-SignalHandlerOptions
-get_current_signal_handler_options()
-{
+/*!
+ * \brief 获取当前信号处理器选项 (Get current signal handler options)
+ *
+ * \return 当前信号处理器选项对象 (Current signal handler options object)
+ */
+SignalHandlerOptions get_current_signal_handler_options() {
   return SignalHandler::get_global_signal_handler().get_current_signal_handler_options();
 }
 
+/*!
+ * \brief 卸载信号处理器 (Uninstall signal handlers)
+ *
+ * \return 是否成功卸载信号处理器 (Whether the signal handlers were successfully uninstalled)
+ */
+bool uninstall_signal_handlers() { return SignalHandler::get_global_signal_handler().uninstall(); }
 
-bool
-uninstall_signal_handlers()
-{
-  return SignalHandler::get_global_signal_handler().uninstall();
-}
-
-static
-std::vector<std::string>
-_remove_ros_arguments(
-  char const * const * argv,
-  const rcl_arguments_t * args,
-  rcl_allocator_t alloc)
-{
+/*!
+ * \brief 移除 ROS 参数 (Remove ROS arguments)
+ *
+ * \param[in] argv 命令行参数的数组 (Array of command line arguments)
+ * \param[in] args rcl_arguments_t 结构体指针 (Pointer to rcl_arguments_t structure)
+ * \param[in] alloc 分配器对象 (Allocator object)
+ * \return 返回移除 ROS 参数后的命令行参数向量 (Return a vector of command line arguments after
+ * removing ROS arguments)
+ */
+static std::vector<std::string> _remove_ros_arguments(
+    char const *const *argv, const rcl_arguments_t *args, rcl_allocator_t alloc) {
   rcl_ret_t ret;
   int nonros_argc = 0;
-  const char ** nonros_argv = NULL;
+  const char **nonros_argv = NULL;
 
-  ret = rcl_remove_ros_arguments(
-    argv,
-    args,
-    alloc,
-    &nonros_argc,
-    &nonros_argv);
+  // 移除 ROS 参数 (Remove ROS arguments)
+  ret = rcl_remove_ros_arguments(argv, args, alloc, &nonros_argc, &nonros_argv);
 
   if (RCL_RET_OK != ret || nonros_argc < 0) {
-    // Not using throw_from_rcl_error, because we may need to append deallocation failures.
+    // 处理异常 (Handle exception)
     exceptions::RCLError exc(ret, rcl_get_error_state(), "");
     rcl_reset_error();
     if (NULL != nonros_argv) {
@@ -96,6 +112,8 @@ _remove_ros_arguments(
     throw exc;
   }
 
+  // 将移除 ROS 参数后的命令行参数存储到向量中 (Store the command line arguments after removing ROS
+  // arguments in a vector)
   std::vector<std::string> return_arguments(static_cast<size_t>(nonros_argc));
 
   for (size_t ii = 0; ii < static_cast<size_t>(nonros_argc); ++ii) {
@@ -109,12 +127,17 @@ _remove_ros_arguments(
   return return_arguments;
 }
 
-std::vector<std::string>
-init_and_remove_ros_arguments(
-  int argc,
-  char const * const * argv,
-  const InitOptions & init_options)
-{
+/*!
+ * \brief 初始化并移除 ROS 参数 (Initialize and remove ROS arguments)
+ *
+ * \param[in] argc 命令行参数的数量 (Number of command line arguments)
+ * \param[in] argv 命令行参数的数组 (Array of command line arguments)
+ * \param[in] init_options 初始化选项对象 (Initialization options object)
+ * \return 返回移除 ROS 参数后的命令行参数向量 (Return a vector of command line arguments after
+ * removing ROS arguments)
+ */
+std::vector<std::string> init_and_remove_ros_arguments(
+    int argc, char const *const *argv, const InitOptions &init_options) {
   init(argc, argv, init_options);
 
   using rclcpp::contexts::get_global_default_context;
@@ -122,14 +145,21 @@ init_and_remove_ros_arguments(
   return _remove_ros_arguments(argv, &(rcl_context->global_arguments), rcl_get_default_allocator());
 }
 
-std::vector<std::string>
-remove_ros_arguments(int argc, char const * const * argv)
-{
+/*!
+ * \brief 移除 ROS 参数 (Remove ROS arguments)
+ *
+ * \param[in] argc 命令行参数的数量 (Number of command line arguments)
+ * \param[in] argv 命令行参数的数组 (Array of command line arguments)
+ * \return 返回移除 ROS 参数后的命令行参数向量 (Return a vector of command line arguments after
+ * removing ROS arguments)
+ */
+std::vector<std::string> remove_ros_arguments(int argc, char const *const *argv) {
   rcl_allocator_t alloc = rcl_get_default_allocator();
   rcl_arguments_t parsed_args = rcl_get_zero_initialized_arguments();
 
   rcl_ret_t ret;
 
+  // 解析命令行参数 (Parse command line arguments)
   ret = rcl_parse_arguments(argc, argv, alloc, &parsed_args);
   if (RCL_RET_OK != ret) {
     exceptions::throw_from_rcl_error(ret, "failed to parse arguments");
@@ -138,28 +168,32 @@ remove_ros_arguments(int argc, char const * const * argv)
   std::vector<std::string> return_arguments;
   try {
     return_arguments = _remove_ros_arguments(argv, &parsed_args, alloc);
-  } catch (exceptions::RCLError & exc) {
+  } catch (exceptions::RCLError &exc) {
     if (RCL_RET_OK != rcl_arguments_fini(&parsed_args)) {
-      exc.formatted_message += std::string(
-        ", failed also to cleanup parsed arguments, leaking memory: ") +
-        rcl_get_error_string().str;
+      exc.formatted_message +=
+          std::string(", failed also to cleanup parsed arguments, leaking memory: ") +
+          rcl_get_error_string().str;
       rcl_reset_error();
     }
     throw exc;
   }
 
+  // 清理解析后的参数 (Clean up parsed arguments)
   ret = rcl_arguments_fini(&parsed_args);
   if (RCL_RET_OK != ret) {
-    exceptions::throw_from_rcl_error(
-      ret, "failed to cleanup parsed arguments, leaking memory");
+    exceptions::throw_from_rcl_error(ret, "failed to cleanup parsed arguments, leaking memory");
   }
 
   return return_arguments;
 }
 
-bool
-ok(Context::SharedPtr context)
-{
+/*!
+ * \brief 检查 ROS2 节点是否正常运行 (Check if the ROS2 node is running normally)
+ *
+ * \param[in] context 上下文共享指针 (Shared pointer to the context)
+ * \return ROS2 节点是否正常运行 (Whether the ROS2 node is running normally)
+ */
+bool ok(Context::SharedPtr context) {
   using rclcpp::contexts::get_global_default_context;
   if (nullptr == context) {
     context = get_global_default_context();
@@ -167,9 +201,14 @@ ok(Context::SharedPtr context)
   return context->is_valid();
 }
 
-bool
-shutdown(Context::SharedPtr context, const std::string & reason)
-{
+/*!
+ * \brief 关闭 ROS2 节点 (Shutdown the ROS2 node)
+ *
+ * \param[in] context 上下文共享指针 (Shared pointer to the context)
+ * \param[in] reason 关闭原因 (Reason for shutdown)
+ * \return 是否成功关闭 ROS2 节点 (Whether the ROS2 node was successfully shut down)
+ */
+bool shutdown(Context::SharedPtr context, const std::string &reason) {
   using rclcpp::contexts::get_global_default_context;
   auto default_context = get_global_default_context();
   if (nullptr == context) {
@@ -182,9 +221,13 @@ shutdown(Context::SharedPtr context, const std::string & reason)
   return ret;
 }
 
-void
-on_shutdown(std::function<void()> callback, Context::SharedPtr context)
-{
+/*!
+ * \brief 注册关闭回调函数 (Register shutdown callback function)
+ *
+ * \param[in] callback 回调函数 (Callback function)
+ * \param[in] context 上下文共享指针 (Shared pointer to the context)
+ */
+void on_shutdown(std::function<void()> callback, Context::SharedPtr context) {
   using rclcpp::contexts::get_global_default_context;
   if (nullptr == context) {
     context = get_global_default_context();
@@ -192,9 +235,14 @@ on_shutdown(std::function<void()> callback, Context::SharedPtr context)
   context->on_shutdown(callback);
 }
 
-bool
-sleep_for(const std::chrono::nanoseconds & nanoseconds, Context::SharedPtr context)
-{
+/*!
+ * \brief 睡眠一段时间 (Sleep for a period of time)
+ *
+ * \param[in] nanoseconds 睡眠的纳秒数 (Number of nanoseconds to sleep)
+ * \param[in] context 上下文共享指针 (Shared pointer to the context)
+ * \return 是否成功睡眠 (Whether the sleep was successful)
+ */
+bool sleep_for(const std::chrono::nanoseconds &nanoseconds, Context::SharedPtr context) {
   using rclcpp::contexts::get_global_default_context;
   if (nullptr == context) {
     context = get_global_default_context();
@@ -202,21 +250,18 @@ sleep_for(const std::chrono::nanoseconds & nanoseconds, Context::SharedPtr conte
   return context->sleep_for(nanoseconds);
 }
 
-const char *
-get_c_string(const char * string_in)
-{
-  return string_in;
-}
+// 获取 C 风格字符串 (Get C-style string)
+const char *get_c_string(const char *string_in) { return string_in; }
+const char *get_c_string(const std::string &string_in) { return string_in.c_str(); }
 
-const char *
-get_c_string(const std::string & string_in)
-{
-  return string_in.c_str();
-}
-
-std::vector<const char *>
-get_c_vector_string(const std::vector<std::string> & strings_in)
-{
+/*!
+ * \brief 将 std::vector<std::string> 转换为 std::vector<const char *> (Convert
+ * std::vector<std::string> to std::vector<const char *>)
+ *
+ * \param[in] strings_in 输入的字符串向量 (Input vector of strings)
+ * \return 返回转换后的 const char * 向量 (Return the converted vector of const char *)
+ */
+std::vector<const char *> get_c_vector_string(const std::vector<std::string> &strings_in) {
   std::vector<const char *> cstrings;
   cstrings.reserve(strings_in.size());
 

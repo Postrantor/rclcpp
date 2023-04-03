@@ -18,18 +18,15 @@
 #include "rclcpp/memory_strategy.hpp"
 #include "rclcpp/visibility_control.hpp"
 
-namespace rclcpp
-{
-namespace memory_strategies
-{
+namespace rclcpp {
+namespace memory_strategies {
 
-/// Create a MemoryStrategy sharedPtr
+/// 创建一个 MemoryStrategy sharedPtr（Create a MemoryStrategy sharedPtr）
 /**
- * \return a MemoryStrategy sharedPtr
+ * \return 一个 MemoryStrategy sharedPtr（a MemoryStrategy sharedPtr）
  */
 RCLCPP_PUBLIC
-memory_strategy::MemoryStrategy::SharedPtr
-create_default_strategy();
+memory_strategy::MemoryStrategy::SharedPtr create_default_strategy();
 
 }  // namespace memory_strategies
 }  // namespace rclcpp

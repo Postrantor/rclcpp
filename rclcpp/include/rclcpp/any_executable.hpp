@@ -27,27 +27,35 @@
 #include "rclcpp/visibility_control.hpp"
 #include "rclcpp/waitable.hpp"
 
-namespace rclcpp
-{
+namespace rclcpp {
 
-struct AnyExecutable
-{
+/**
+ * @struct AnyExecutable
+ * @brief 一个通用的可执行对象，可以是订阅、定时器、服务、客户端或等待对象。
+ *        A generic executable object, which can be a subscription, timer, service, client, or
+ * waitable.
+ */
+struct AnyExecutable {
+  /// 构造函数。Constructor.
   RCLCPP_PUBLIC
   AnyExecutable();
 
+  /// 虚拟析构函数。Virtual destructor.
   RCLCPP_PUBLIC
   virtual ~AnyExecutable();
 
-  // Only one of the following pointers will be set.
-  rclcpp::SubscriptionBase::SharedPtr subscription;
-  rclcpp::TimerBase::SharedPtr timer;
-  rclcpp::ServiceBase::SharedPtr service;
-  rclcpp::ClientBase::SharedPtr client;
-  rclcpp::Waitable::SharedPtr waitable;
-  // These are used to keep the scope on the containing items
-  rclcpp::CallbackGroup::SharedPtr callback_group;
-  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base;
-  std::shared_ptr<void> data;
+  // 只有下面指针列表中的一个会被设置。Only one of the following pointers will be set.
+  rclcpp::SubscriptionBase::SharedPtr subscription;  ///< 订阅指针。Subscription pointer.
+  rclcpp::TimerBase::SharedPtr timer;                ///< 定时器指针。Timer pointer.
+  rclcpp::ServiceBase::SharedPtr service;            ///< 服务指针。Service pointer.
+  rclcpp::ClientBase::SharedPtr client;              ///< 客户端指针。Client pointer.
+  rclcpp::Waitable::SharedPtr waitable;              ///< 等待对象指针。Waitable pointer.
+
+  // 下面的变量用于保持包含项目的作用域。These are used to keep the scope on the containing items.
+  rclcpp::CallbackGroup::SharedPtr callback_group;  ///< 回调组指针。Callback group pointer.
+  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr
+      node_base;               ///< 节点基础接口指针。Node base interface pointer.
+  std::shared_ptr<void> data;  ///< 数据指针。Data pointer.
 };
 
 }  // namespace rclcpp

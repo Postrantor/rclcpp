@@ -16,17 +16,19 @@
 
 #include "rcl/publisher.h"
 
-namespace rclcpp
-{
-namespace detail
-{
+namespace rclcpp {
+namespace detail {
 
-void
-RMWImplementationSpecificPublisherPayload::modify_rmw_publisher_options(
-  rmw_publisher_options_t & rmw_publisher_options) const
-{
-  // By default, do not mutate the rmw publisher options.
-  (void)rmw_publisher_options;
+/**
+ * @brief 修改 RMW 发布者选项 (Modify the RMW publisher options)
+ *
+ * @param rmw_publisher_options RMW发布者选项的引用 (Reference to the RMW publisher options)
+ */
+void RMWImplementationSpecificPublisherPayload::modify_rmw_publisher_options(
+    rmw_publisher_options_t& rmw_publisher_options) const {
+  // 默认情况下，不改变 rmw 发布者选项 (By default, do not mutate the rmw publisher options)
+  (void)rmw_publisher_options;  // 防止未使用参数的编译器警告 (Prevent unused parameter compiler
+                                // warning)
 }
 
 }  // namespace detail

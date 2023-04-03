@@ -14,21 +14,36 @@
 
 #include "rclcpp_lifecycle/managed_entity.hpp"
 
-namespace rclcpp_lifecycle
-{
+namespace rclcpp_lifecycle {
 
-void SimpleManagedEntity::on_activate()
-{
+/**
+ * @brief 激活 SimpleManagedEntity 实例 (Activate the SimpleManagedEntity instance)
+ */
+void SimpleManagedEntity::on_activate() {
+  // 将 activated_ 原子变量设置为 true，表示实例已激活 (Set the atomic variable activated_ to true,
+  // indicating that the instance is activated)
   activated_.store(true);
 }
 
-void SimpleManagedEntity::on_deactivate()
-{
+/**
+ * @brief 取消激活 SimpleManagedEntity 实例 (Deactivate the SimpleManagedEntity instance)
+ */
+void SimpleManagedEntity::on_deactivate() {
+  // 将 activated_ 原子变量设置为 false，表示实例已取消激活 (Set the atomic variable activated_ to
+  // false, indicating that the instance is deactivated)
   activated_.store(false);
 }
 
-bool SimpleManagedEntity::is_activated() const
-{
+/**
+ * @brief 查询 SimpleManagedEntity 实例是否已激活 (Check if the SimpleManagedEntity instance is
+ * activated)
+ *
+ * @return 返回 true 表示已激活，false 表示未激活 (Return true if activated, false if not activated)
+ */
+bool SimpleManagedEntity::is_activated() const {
+  // 从 activated_ 原子变量加载值并返回，用于判断实例是否处于激活状态 (Load the value from the
+  // atomic variable activated_ and return it, used to determine whether the instance is in an
+  // activated state)
   return activated_.load();
 }
 

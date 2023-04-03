@@ -16,16 +16,18 @@
 
 #include "rcl/subscription.h"
 
-namespace rclcpp
-{
-namespace detail
-{
+namespace rclcpp {
+namespace detail {
 
-void
-RMWImplementationSpecificSubscriptionPayload::modify_rmw_subscription_options(
-  rmw_subscription_options_t & rmw_subscription_options) const
-{
-  // By default, do not mutate the rmw subscription options.
+/**
+ * @brief 修改 RMW 订阅选项 (Modify RMW subscription options)
+ *
+ * @param rmw_subscription_options RMW 订阅选项的引用 (Reference to RMW subscription options)
+ */
+void RMWImplementationSpecificSubscriptionPayload::modify_rmw_subscription_options(
+    rmw_subscription_options_t& rmw_subscription_options) const {
+  // 默认情况下，不改变 RMW 订阅选项
+  // (By default, do not mutate the RMW subscription options)
   (void)rmw_subscription_options;
 }
 

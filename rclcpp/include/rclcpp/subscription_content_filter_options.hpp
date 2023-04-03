@@ -18,17 +18,21 @@
 #include <string>
 #include <vector>
 
-namespace rclcpp
-{
+namespace rclcpp {
 
 /// Options to configure content filtered topic in the subscription.
-struct ContentFilterOptions
-{
+/// 配置订阅中内容过滤主题的选项。
+struct ContentFilterOptions {
   /// Filter expression is similar to the WHERE part of an SQL clause.
+  /// 过滤器表达式类似于 SQL 子句中的 WHERE 部分。
   std::string filter_expression;
+
   /**
    * Expression parameters is the tokens placeholder ‘parameters’ (i.e., "%n" tokens begin from 0)
    * in the filter_expression. The maximum expression_parameters size is 100.
+   *
+   * 表达式参数是过滤器表达式中的占位符 'parameters'（即，"%n" 代表从 0 开始的数字）
+   * 最大的 expression_parameters 大小为 100。
    */
   std::vector<std::string> expression_parameters;
 };

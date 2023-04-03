@@ -13,25 +13,34 @@
 // limitations under the License.
 
 #include "rclcpp/detail/add_guard_condition_to_rcl_wait_set.hpp"
+
 #include "rclcpp/exceptions.hpp"
 
-namespace rclcpp
-{
-namespace detail
-{
+namespace rclcpp {
+namespace detail {
 
-void
-add_guard_condition_to_rcl_wait_set(
-  rcl_wait_set_t & wait_set,
-  const rclcpp::GuardCondition & guard_condition)
-{
-  const auto & gc = guard_condition.get_rcl_guard_condition();
+/**
+ * @brief 添加一个守护条件到 rcl_wait_set 中 (Add a guard condition to the rcl_wait_set)
+ *
+ * @param wait_set rcl_wait_set_t 类型的引用，用于存储等待集合 (Reference to an rcl_wait_set_t,
+ * which stores the wait set)
+ * @param guard_condition rclcpp::GuardCondition 类型的常量引用，表示要添加的守护条件 (Constant
+ * reference to an rclcpp::GuardCondition, representing the guard condition to be added)
+ */
+void add_guard_condition_to_rcl_wait_set(
+    rcl_wait_set_t& wait_set, const rclcpp::GuardCondition& guard_condition) {
+  // 获取守护条件的 rcl_guard_condition_t 结构体 (Get the rcl_guard_condition_t structure of the
+  // guard condition)
+  const auto& gc = guard_condition.get_rcl_guard_condition();
 
+  // 将守护条件添加到 wait_set 中，并检查返回值 (Add the guard condition to the wait_set and check
+  // the return value)
   rcl_ret_t ret = rcl_wait_set_add_guard_condition(&wait_set, &gc, NULL);
 
+  // 如果返回值不是 RCL_RET_OK，则抛出异常 (If the return value is not RCL_RET_OK, throw an
+  // exception)
   if (RCL_RET_OK != ret) {
-    rclcpp::exceptions::throw_from_rcl_error(
-      ret, "failed to add guard condition to wait set");
+    rclcpp::exceptions::throw_from_rcl_error(ret, "failed to add guard condition to wait set");
   }
 }
 

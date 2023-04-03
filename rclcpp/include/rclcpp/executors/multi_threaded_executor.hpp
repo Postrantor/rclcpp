@@ -27,18 +27,28 @@
 #include "rclcpp/memory_strategies.hpp"
 #include "rclcpp/visibility_control.hpp"
 
-namespace rclcpp
-{
-namespace executors
-{
+namespace rclcpp {
+namespace executors {
 
-class MultiThreadedExecutor : public rclcpp::Executor
-{
+/**
+ * @class MultiThreadedExecutor
+ * @brief 多线程执行器，继承自 rclcpp::Executor 类。
+ * @details 该类用于实现 ROS2 节点的多线程执行。
+ */
+class MultiThreadedExecutor : public rclcpp::Executor {
 public:
+  // 定义智能指针类型
   RCLCPP_SMART_PTR_DEFINITIONS(MultiThreadedExecutor)
 
-  /// Constructor for MultiThreadedExecutor.
   /**
+   * @brief 构造函数
+   * @param options 执行器通用选项
+   * @param number_of_threads 线程池中的线程数，默认值为 0，表示使用检测到的 CPU 核心数（至少为 2）
+   * @param yield_before_execute 如果为 true，在获取工作并释放锁之后，但在执行工作之前调用
+   * std::this_thread::yield()
+   * @param timeout 最长等待时间
+   *
+   * Constructor for MultiThreadedExecutor.
    * For the yield_before_execute option, when true std::this_thread::yield()
    * will be called after acquiring work (as an AnyExecutable) and
    * releasing the spinning lock, but before executing the work.
@@ -53,37 +63,45 @@ public:
    */
   RCLCPP_PUBLIC
   explicit MultiThreadedExecutor(
-    const rclcpp::ExecutorOptions & options = rclcpp::ExecutorOptions(),
-    size_t number_of_threads = 0,
-    bool yield_before_execute = false,
-    std::chrono::nanoseconds timeout = std::chrono::nanoseconds(-1));
+      const rclcpp::ExecutorOptions& options = rclcpp::ExecutorOptions(),
+      size_t number_of_threads = 0,
+      bool yield_before_execute = false,
+      std::chrono::nanoseconds timeout = std::chrono::nanoseconds(-1));
 
+  // 析构函数
   RCLCPP_PUBLIC
   virtual ~MultiThreadedExecutor();
 
   /**
+   * @brief 启动执行器
+   * @throws std::runtime_error 当 spin() 在已经开始 spinning 时被调用
+   *
    * \sa rclcpp::Executor:spin() for more details
    * \throws std::runtime_error when spin() called while already spinning
    */
   RCLCPP_PUBLIC
-  void
-  spin() override;
+  void spin() override;
 
+  // 获取线程池中线程的数量
   RCLCPP_PUBLIC
-  size_t
-  get_number_of_threads();
+  size_t get_number_of_threads();
 
 protected:
+  // 线程运行函数
   RCLCPP_PUBLIC
-  void
-  run(size_t this_thread_number);
+  void run(size_t this_thread_number);
 
 private:
+  // 禁用拷贝构造和赋值操作符
   RCLCPP_DISABLE_COPY(MultiThreadedExecutor)
 
+  // 等待互斥锁
   std::mutex wait_mutex_;
+  // 线程数
   size_t number_of_threads_;
+  // 是否在执行前调用 yield
   bool yield_before_execute_;
+  // 下一个执行的超时时间
   std::chrono::nanoseconds next_exec_timeout_;
 };
 

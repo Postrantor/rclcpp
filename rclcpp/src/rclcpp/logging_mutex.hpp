@@ -20,20 +20,18 @@
 
 #include "rclcpp/visibility_control.hpp"
 
-/// Global logging mutex
+/// 全局日志互斥锁 (Global logging mutex)
 /**
- * This mutex is locked in the following situations:
- *   - In initialization/destruction of contexts.
- *   - In initialization/destruction of nodes.
- *   - In the rcl logging output handler installed by rclcpp,
- *     i.e.: in all calls to the logger macros, including RCUTILS_* ones.
+ * 在以下情况下会锁定此互斥锁：(This mutex is locked in the following situations:)
+ *   - 在上下文的初始化/销毁期间。(In initialization/destruction of contexts.)
+ *   - 在节点的初始化/销毁期间。(In initialization/destruction of nodes.)
+ *   - 在 rclcpp 安装的 rcl 日志输出处理程序中，(In the rcl logging output handler installed by rclcpp,)
+ *     也就是说：在所有对记录器宏的调用中，包括 RCUTILS_* 之类的。(i.e.: in all calls to the logger macros, including RCUTILS_* ones.)
  */
-// Implementation detail:
-// A shared pointer to the mutex is used, so that objects that need to use
-// it at destruction time can hold it alive.
-// In that way, a destruction ordering problem between static objects is avoided.
+// 实现细节：(Implementation detail:)
+// 使用指向互斥锁的共享指针，以便需要在销毁时使用它的对象可以保持其生存。(A shared pointer to the mutex is used, so that objects that need to use)
+// 通过这种方式，避免了静态对象之间的销毁顺序问题。(it at destruction time can hold it alive. In that way, a destruction ordering problem between static objects is avoided.)
 RCLCPP_LOCAL
-std::shared_ptr<std::recursive_mutex>
-get_global_logging_mutex();
+std::shared_ptr<std::recursive_mutex> get_global_logging_mutex();
 
-#endif  // RCLCPP__LOGGING_MUTEX_HPP_
+#endif // RCLCPP__LOGGING_MUTEX_HPP_

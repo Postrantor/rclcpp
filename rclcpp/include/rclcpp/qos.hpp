@@ -17,30 +17,35 @@
 
 #include <string>
 
+#include "rcl/logging_rosout.h"
 #include "rclcpp/duration.hpp"
 #include "rclcpp/exceptions.hpp"
 #include "rclcpp/visibility_control.hpp"
-#include "rcl/logging_rosout.h"
 #include "rmw/incompatible_qos_events_statuses.h"
 #include "rmw/qos_profiles.h"
 #include "rmw/types.h"
 
-namespace rclcpp
-{
+namespace rclcpp {
 
+/**
+ * @brief 从 QoS 策略类型中获取策略名称 (Get policy name from QoS policy kind)
+ *
+ * @param policy_kind QoS 策略类型 (QoS policy kind)
+ * @return std::string 策略名称 (Policy name)
+ */
 RCLCPP_PUBLIC
 std::string qos_policy_name_from_kind(rmw_qos_policy_kind_t policy_kind);
 
-enum class HistoryPolicy
-{
+// 历史策略枚举类 (History policy enumeration class)
+enum class HistoryPolicy {
   KeepLast = RMW_QOS_POLICY_HISTORY_KEEP_LAST,
   KeepAll = RMW_QOS_POLICY_HISTORY_KEEP_ALL,
   SystemDefault = RMW_QOS_POLICY_HISTORY_SYSTEM_DEFAULT,
   Unknown = RMW_QOS_POLICY_HISTORY_UNKNOWN,
 };
 
-enum class ReliabilityPolicy
-{
+// 可靠性策略枚举类 (Reliability policy enumeration class)
+enum class ReliabilityPolicy {
   BestEffort = RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,
   Reliable = RMW_QOS_POLICY_RELIABILITY_RELIABLE,
   SystemDefault = RMW_QOS_POLICY_RELIABILITY_SYSTEM_DEFAULT,
@@ -48,8 +53,8 @@ enum class ReliabilityPolicy
   Unknown = RMW_QOS_POLICY_RELIABILITY_UNKNOWN,
 };
 
-enum class DurabilityPolicy
-{
+// 持久性策略枚举类 (Durability policy enumeration class)
+enum class DurabilityPolicy {
   Volatile = RMW_QOS_POLICY_DURABILITY_VOLATILE,
   TransientLocal = RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL,
   SystemDefault = RMW_QOS_POLICY_DURABILITY_SYSTEM_DEFAULT,
@@ -57,8 +62,8 @@ enum class DurabilityPolicy
   Unknown = RMW_QOS_POLICY_DURABILITY_UNKNOWN,
 };
 
-enum class LivelinessPolicy
-{
+// 活跃度策略枚举类 (Liveliness policy enumeration class)
+enum class LivelinessPolicy {
   Automatic = RMW_QOS_POLICY_LIVELINESS_AUTOMATIC,
   ManualByTopic = RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_TOPIC,
   SystemDefault = RMW_QOS_POLICY_LIVELINESS_SYSTEM_DEFAULT,
@@ -66,469 +71,350 @@ enum class LivelinessPolicy
   Unknown = RMW_QOS_POLICY_LIVELINESS_UNKNOWN,
 };
 
-enum class QoSCompatibility
-{
-  Ok = RMW_QOS_COMPATIBILITY_OK,
-  Warning = RMW_QOS_COMPATIBILITY_WARNING,
-  Error = RMW_QOS_COMPATIBILITY_ERROR,
+// QoS 兼容性枚举类 (QoS compatibility enumeration class)
+enum class QoSCompatibility {
+  Ok = RMW_QOS_COMPATIBILITY_OK,            // 兼容 (Compatible)
+  Warning = RMW_QOS_COMPATIBILITY_WARNING,  // 警告 (Warning)
+  Error = RMW_QOS_COMPATIBILITY_ERROR,      // 错误 (Error)
 };
 
-/// QoS initialization values, cannot be created directly, use KeepAll or KeepLast instead.
-struct RCLCPP_PUBLIC QoSInitialization
-{
+/// QoS 初始化值，不能直接创建，请使用 KeepAll 或 KeepLast 代替。
+struct RCLCPP_PUBLIC QoSInitialization {
   rmw_qos_history_policy_t history_policy;
   size_t depth;
 
-  /// Constructor which takes both a history policy and a depth (even if it would be unused).
+  /// 构造函数，接收历史策略和深度（即使它不会被使用）。
   QoSInitialization(
-    rmw_qos_history_policy_t history_policy_arg, size_t depth_arg,
-    bool print_depth_warning = true);
+      rmw_qos_history_policy_t history_policy_arg,
+      size_t depth_arg,
+      bool print_depth_warning = true);
 
-  /// Create a QoSInitialization from an existing rmw_qos_profile_t, using its history and depth.
-  static
-  QoSInitialization
-  from_rmw(const rmw_qos_profile_t & rmw_qos);
+  /// 从现有的 rmw_qos_profile_t 创建一个 QoSInitialization，使用其历史和深度。
+  static QoSInitialization from_rmw(const rmw_qos_profile_t& rmw_qos);
 };
 
-/// Use to initialize the QoS with the keep_all history setting.
-struct RCLCPP_PUBLIC KeepAll : public rclcpp::QoSInitialization
-{
+/// 用于将 QoS 初始化为 keep_all 历史设置。
+struct RCLCPP_PUBLIC KeepAll : public rclcpp::QoSInitialization {
   KeepAll();
 };
 
-/// Use to initialize the QoS with the keep_last history setting and the given depth.
-struct RCLCPP_PUBLIC KeepLast : public rclcpp::QoSInitialization
-{
+/// 用于将 QoS 初始化为 keep_last 历史设置和给定深度。
+struct RCLCPP_PUBLIC KeepLast : public rclcpp::QoSInitialization {
   explicit KeepLast(size_t depth, bool print_depth_warning = true);
 };
 
-/// Encapsulation of Quality of Service settings.
+/// 封装质量服务设置，返回 `rmw_qos_profile_t` 的结构。
 /**
- * Quality of Service settings control the behavior of publishers, subscriptions,
- * and other entities, and includes things like how data is sent or resent,
- * how data is buffered on the publishing and subscribing side, and other things.
- * See:
- *   <a href="https://docs.ros.org/en/rolling/Concepts/About-Quality-of-Service-Settings.html">
+ * 质量服务设置控制发布者、订阅者和其他实体的行为，包括如何发送或重新发送数据、
+ * 在发布和订阅方如何缓冲数据等。
+ * 参见： (See:) <a
+ * href="https://docs.ros.org/en/rolling/Concepts/About-Quality-of-Service-Settings.html">
  *     https://docs.ros.org/en/rolling/Concepts/About-Quality-of-Service-Settings.html
  *   </a>
  */
-class RCLCPP_PUBLIC QoS
-{
+class RCLCPP_PUBLIC QoS {
 public:
-  /// Create a QoS by specifying only the history policy and history depth.
+  /// 通过指定历史策略和历史深度创建一个 QoS。
   /**
-   * When using the default initial profile, the defaults will include:
+   * 使用默认初始配置文件时，默认值将包括：
    *
    *   - \link rclcpp::ReliabilityPolicy::Reliable ReliabilityPolicy::Reliable\endlink
    *   - \link rclcpp::DurabilityPolicy::Volatile DurabilityPolicy::Volatile\endlink
    *
-   * See rmw_qos_profile_default for a full list of default settings.
-   * If some other rmw_qos_profile_t is passed to initial_profile, then the defaults will derive from
-   * that profile instead.
+   * 有关默认设置的完整列表，请参阅 rmw_qos_profile_default。
+   * 如果将其他 rmw_qos_profile_t 传递给 initial_profile，则默认值将从该配置文件派生。
    *
-   * \param[in] qos_initialization Specifies history policy and history depth.
-   * \param[in] initial_profile The rmw_qos_profile_t instance on which to base the default settings.
+   * \param[in] qos_initialization 指定历史策略和历史深度。
+   * \param[in] initial_profile 用于基于默认设置的 rmw_qos_profile_t 实例。
    */
-  explicit
-  QoS(
-    const QoSInitialization & qos_initialization,
-    const rmw_qos_profile_t & initial_profile = rmw_qos_profile_default);
+  explicit QoS(
+      const QoSInitialization& qos_initialization,
+      const rmw_qos_profile_t& initial_profile = rmw_qos_profile_default);
 
-  /// Conversion constructor to ease construction in the common case of just specifying depth.
+  /// 转换构造函数，方便在仅指定深度的常见情况下进行构造。
   /**
-   * This is a convenience constructor that calls QoS(KeepLast(history_depth)).
-   *
-   * \param[in] history_depth How many messages can be queued when publishing
-   *   with a Publisher, or how many messages can be queued before being replaced
-   *   by a Subscription.
+   * 这是一个便利构造函数，调用 QoS(KeepLast(history_depth))。
+   * \param[in] history_depth 发布时可以排队的消息数，或者在被订阅替换之前可以排队的消息数。
    */
   // cppcheck-suppress noExplicitConstructor
   QoS(size_t history_depth);  // NOLINT(runtime/explicit): conversion constructor
-
-  /// Return the rmw qos profile.
-  rmw_qos_profile_t &
-  get_rmw_qos_profile();
-
-  /// Return the rmw qos profile.
-  const rmw_qos_profile_t &
-  get_rmw_qos_profile() const;
-
-  /// Set the history policy.
-  QoS &
-  history(HistoryPolicy history);
-
-  /// Set the history policy.
-  QoS &
-  history(rmw_qos_history_policy_t history);
-
-  /// Set the history to keep last.
-  QoS &
-  keep_last(size_t depth);
-
-  /// Set the history to keep all.
-  QoS &
-  keep_all();
-
-  /// Set the reliability setting.
-  QoS &
-  reliability(rmw_qos_reliability_policy_t reliability);
-
-  /// Set the reliability setting.
-  QoS &
-  reliability(ReliabilityPolicy reliability);
-
-  /// Set the reliability setting to reliable.
-  QoS &
-  reliable();
-
-  /// Set the reliability setting to best effort.
-  QoS &
-  best_effort();
-
-  /// Set the reliability setting to best available.
-  QoS &
-  reliability_best_available();
-
-  /// Set the durability setting.
-  QoS &
-  durability(rmw_qos_durability_policy_t durability);
-
-  /// Set the durability setting.
-  QoS &
-  durability(DurabilityPolicy durability);
-
-  /// Set the durability setting to volatile.
-  /**
-    * Note that this cannot be named `volatile` because it is a C++ keyword.
-    */
-  QoS &
-  durability_volatile();
-
-  /// Set the durability setting to transient local.
-  QoS &
-  transient_local();
-
-  /// Set the durability setting to best available.
-  QoS &
-  durability_best_available();
-
-  /// Set the deadline setting.
-  QoS &
-  deadline(rmw_time_t deadline);
-
-  /// Set the deadline setting, rclcpp::Duration.
-  QoS &
-  deadline(const rclcpp::Duration & deadline);
-
-  /// Set the lifespan setting.
-  QoS &
-  lifespan(rmw_time_t lifespan);
-
-  /// Set the lifespan setting, rclcpp::Duration.
-  QoS &
-  lifespan(const rclcpp::Duration & lifespan);
-
-  /// Set the liveliness setting.
-  QoS &
-  liveliness(rmw_qos_liveliness_policy_t liveliness);
-
-  /// Set the liveliness setting.
-  QoS &
-  liveliness(LivelinessPolicy liveliness);
-
-  /// Set the liveliness_lease_duration setting.
-  QoS &
-  liveliness_lease_duration(rmw_time_t liveliness_lease_duration);
-
-  /// Set the liveliness_lease_duration setting, rclcpp::Duration.
-  QoS &
-  liveliness_lease_duration(const rclcpp::Duration & liveliness_lease_duration);
-
-  /// Set the avoid_ros_namespace_conventions setting.
-  QoS &
-  avoid_ros_namespace_conventions(bool avoid_ros_namespace_conventions);
-
-  /// Get the history qos policy.
-  HistoryPolicy
-  history() const;
-
-  /// Get the history depth.
-  size_t
-  depth() const;
-
-  /// Get the reliability policy.
-  ReliabilityPolicy
-  reliability() const;
-
-  /// Get the durability policy.
-  DurabilityPolicy
-  durability() const;
-
-  /// Get the deadline duration setting.
-  rclcpp::Duration
-  deadline() const;
-
-  /// Get the lifespan duration setting.
-  rclcpp::Duration
-  lifespan() const;
-
-  /// Get the liveliness policy.
-  LivelinessPolicy
-  liveliness() const;
-
-  /// Get the liveliness lease duration setting.
-  rclcpp::Duration
-  liveliness_lease_duration() const;
-
-  /// Get the `avoid ros namespace convention` setting.
-  bool
-  avoid_ros_namespace_conventions() const;
+  rmw_qos_profile_t& get_rmw_qos_profile();
+  const rmw_qos_profile_t& get_rmw_qos_profile() const;
+  QoS& history(HistoryPolicy history);
+  QoS& history(rmw_qos_history_policy_t history);
+  QoS& keep_last(size_t depth);
+  QoS& keep_all();
+  QoS& reliability(rmw_qos_reliability_policy_t reliability);
+  QoS& reliability(ReliabilityPolicy reliability);
+  QoS& reliable();
+  QoS& best_effort();
+  QoS& reliability_best_available();
+  QoS& durability(rmw_qos_durability_policy_t durability);
+  QoS& durability(DurabilityPolicy durability);
+  QoS& durability_volatile();
+  QoS& transient_local();
+  QoS& durability_best_available();
+  QoS& deadline(rmw_time_t deadline);
+  QoS& deadline(const rclcpp::Duration& deadline);
+  QoS& lifespan(rmw_time_t lifespan);
+  QoS& lifespan(const rclcpp::Duration& lifespan);
+  QoS& liveliness(rmw_qos_liveliness_policy_t liveliness);
+  QoS& liveliness(LivelinessPolicy liveliness);
+  QoS& liveliness_lease_duration(rmw_time_t liveliness_lease_duration);
+  QoS& liveliness_lease_duration(const rclcpp::Duration& liveliness_lease_duration);
+  QoS& avoid_ros_namespace_conventions(bool avoid_ros_namespace_conventions);
+  HistoryPolicy history() const;
+  size_t depth() const;
+  ReliabilityPolicy reliability() const;
+  DurabilityPolicy durability() const;
+  rclcpp::Duration deadline() const;
+  rclcpp::Duration lifespan() const;
+  LivelinessPolicy liveliness() const;
+  rclcpp::Duration liveliness_lease_duration() const;
+  bool avoid_ros_namespace_conventions() const;
 
 private:
   rmw_qos_profile_t rmw_qos_profile_;
 };
 
-/// Check if two QoS profiles are exactly equal in all policy values.
+/// 检查两个 QoS 配置文件是否在所有策略值上完全相等。
 RCLCPP_PUBLIC
-bool operator==(const QoS & left, const QoS & right);
-RCLCPP_PUBLIC
-bool operator!=(const QoS & left, const QoS & right);
+bool operator==(const QoS& left, const QoS& right);
 
-/// Result type for checking QoS compatibility
-/**
- * \see rclcpp::qos_check_compatible()
- */
-struct QoSCheckCompatibleResult
-{
-  /// Compatibility result.
+/// 检查两个 QoS 配置文件是否不相等。
+RCLCPP_PUBLIC
+bool operator!=(const QoS& left, const QoS& right);
+
+/// 用于检查 QoS 兼容性的结果类型
+struct QoSCheckCompatibleResult {
+  /// 兼容性结果。
   QoSCompatibility compatibility;
 
-  /// Reason for a (possible) incompatibility.
+  /// 不兼容（可能）的原因。
   /**
-   * Set if compatiblity is QoSCompatibility::Warning or QoSCompatiblity::Error.
-   * Not set if the QoS profiles are compatible.
+   * 如果兼容性为 QoSCompatibility::Warning 或 QoSCompatiblity::Error，则设置。
+   * 如果 QoS 配置文件兼容，则不设置。
    */
   std::string reason;
 };
 
-/// Check if two QoS profiles are compatible.
+/// 检查两个 QoS 配置文件是否兼容。
 /**
- * Two QoS profiles are compatible if a publisher and subcription
- * using the QoS policies can communicate with each other.
+ * 如果使用 QoS 策略的发布者和订阅者可以相互通信，则两个 QoS 配置文件是兼容的。
  *
- * If any policies have value "system default" or "unknown" then it is possible that
- * compatiblity cannot be determined.
- * In this case, the value QoSCompatility::Warning is set as part of
- * the returned structure.
+ * 如果任何策略的值为 "system default" 或 "unknown"，则可能无法确定兼容性。
+ * 在这种情况下，返回结构的一部分设置为 QoSCompatility::Warning。
  *
- * Example usage:
+ * 示例用法：
  *
  * ```cpp
  * rclcpp::QoSCheckCompatibleResult result = rclcpp::qos_check_compatible(
  *   publisher_qos, subscription_qos);
  * if (rclcpp::QoSCompatibility::Error != result.compatibility) {
- *   // QoS not compatible ...
- *   // result.reason contains info about the incompatibility
+ *   // QoS 不兼容 ...
+ *   // result.reason 包含关于不兼容性的信息
  * } else if (rclcpp::QoSCompatibility::Warning != result.compatibility) {
- *   // QoS may not be compatible ...
- *   // result.reason contains info about the possible incompatibility
+ *   // QoS 可能不兼容 ...
+ *   // result.reason 包含关于可能的不兼容性的信息
  * }
  * ```
  *
- * \param[in] publisher_qos: The QoS profile for a publisher.
- * \param[in] subscription_qos: The QoS profile for a subscription.
- * \return Struct with compatiblity set to QoSCompatibility::Ok if the QoS profiles are
- *   compatible, or
- * \return Struct with compatibility set to QoSCompatibility::Warning if there is a chance
- *   the QoS profiles are not compatible, or
- * \return Struct with compatibility set to QoSCompatibility::Error if the QoS profiles are
- *   not compatible.
- * \throws rclcpp::exceptions::QoSCheckCompatibilityException if an unexpected error occurs.
+ * \param[in] publisher_qos: 发布者的 QoS 配置文件。
+ * \param[in] subscription_qos: 订阅者的 QoS 配置文件。
+ * \return 如果 QoS 配置文件兼容，则将 compatiblity 设置为 QoSCompatibility::Ok 的结构，或
+ * \return 如果 QoS 配置文件可能不兼容，则将 compatibility 设置为 QoSCompatibility::Warning
+ * 的结构，或
+ * \return 如果 QoS 配置文件不兼容，则将 compatibility 设置为 QoSCompatibility::Error 的结构。
+ * \throws rclcpp::exceptions::QoSCheckCompatibilityException 如果发生意外错误。
  */
 RCLCPP_PUBLIC
-QoSCheckCompatibleResult
-qos_check_compatible(const QoS & publisher_qos, const QoS & subscription_qos);
+QoSCheckCompatibleResult qos_check_compatible(
+    const QoS& publisher_qos,  //
+    const QoS& subscription_qos);
 
 /**
- * Clock QoS class
- *    - History: Keep last,
- *    - Depth: 1,
- *    - Reliability: Best effort,
- *    - Durability: Volatile,
- *    - Deadline: Default,
- *    - Lifespan: Default,
- *    - Liveliness: System default,
- *    - Liveliness lease duration: default,
- *    - avoid ros namespace conventions: false
+ * @brief 时钟 QoS 类 (Clock QoS class)
+ *    - 历史: 保留最后一个 (History: Keep last)
+ *    - 深度: 1 (Depth: 1)
+ *    - 可靠性: 最大努力 (Reliability: Best effort)
+ *    - 持久性: 易失性 (Durability: Volatile)
+ *    - 截止日期: 默认值 (Deadline: Default)
+ *    - 生命周期: 默认值 (Lifespan: Default)
+ *    - 活跃性: 系统默认值 (Liveliness: System default)
+ *    - 活跃性租期持续时间: 默认值 (Liveliness lease duration: default)
+ *    - 避免 ROS 命名空间约定: false (avoid ros namespace conventions: false)
  */
-class RCLCPP_PUBLIC ClockQoS : public QoS
-{
+class RCLCPP_PUBLIC ClockQoS : public QoS {
 public:
-  explicit
-  ClockQoS(
-    const QoSInitialization & qos_initialization = KeepLast(1));
+  // 构造函数，接受 QoS 初始化参数，默认为 KeepLast(1)
+  explicit ClockQoS(const QoSInitialization& qos_initialization = KeepLast(1));
 };
 
 /**
- * Sensor Data QoS class
- *    - History: Keep last,
- *    - Depth: 5,
- *    - Reliability: Best effort,
- *    - Durability: Volatile,
- *    - Deadline: Default,
- *    - Lifespan: Default,
- *    - Liveliness: System default,
- *    - Liveliness lease duration: default,
- *    - avoid ros namespace conventions: false
+ * @brief 传感器数据 QoS 类 (Sensor Data QoS class)
+ *    - 历史: 保留最后一个 (History: Keep last)
+ *    - 深度: 5 (Depth: 5)
+ *    - 可靠性: 最大努力 (Reliability: Best effort)
+ *    - 持久性: 易失性 (Durability: Volatile)
+ *    - 截止日期: 默认值 (Deadline: Default)
+ *    - 生命周期: 默认值 (Lifespan: Default)
+ *    - 活跃性: 系统默认值 (Liveliness: System default)
+ *    - 活跃性租期持续时间: 默认值 (Liveliness lease duration: default)
+ *    - 避免 ROS 命名空间约定: false (avoid ros namespace conventions: false)
  */
-class RCLCPP_PUBLIC SensorDataQoS : public QoS
-{
+class RCLCPP_PUBLIC SensorDataQoS : public QoS {
 public:
-  explicit
-  SensorDataQoS(
-    const QoSInitialization & qos_initialization = (
-      QoSInitialization::from_rmw(rmw_qos_profile_sensor_data)
-  ));
+  // 构造函数，接受 QoS 初始化参数，默认为 rmw_qos_profile_sensor_data)
+  explicit SensorDataQoS(
+      const QoSInitialization& qos_initialization =
+          (QoSInitialization::from_rmw(rmw_qos_profile_sensor_data)));
 };
 
 /**
- * Parameters QoS class
- *    - History: Keep last,
- *    - Depth: 1000,
- *    - Reliability: Reliable,
- *    - Durability: Volatile,
- *    - Deadline: Default,
- *    - Lifespan: Default,
- *    - Liveliness: System default,
- *    - Liveliness lease duration: default,
- *    - Avoid ros namespace conventions: false
+ * @brief Parameters QoS 类 (Parameters QoS class)
+ *    - 历史: 保留最后一条 (History: Keep last),
+ *    - 深度: 1000 (Depth: 1000),
+ *    - 可靠性: 可靠的 (Reliability: Reliable),
+ *    - 持久性: 易失性的 (Durability: Volatile),
+ *    - 截止日期: 默认值 (Deadline: Default),
+ *    - 生命周期: 默认值 (Lifespan: Default),
+ *    - 活跃性: 系统默认 (Liveliness: System default),
+ *    - 活跃性租期: 默认值 (Liveliness lease duration: default),
+ *    - 避免 ROS 命名空间约定: 否 (Avoid ros namespace conventions: false)
  */
-class RCLCPP_PUBLIC ParametersQoS : public QoS
-{
+class RCLCPP_PUBLIC ParametersQoS : public QoS {
 public:
-  explicit
-  ParametersQoS(
-    const QoSInitialization & qos_initialization = (
-      QoSInitialization::from_rmw(rmw_qos_profile_parameters)
-  ));
+  // 构造函数，接受 QoS 初始化参数，默认为 rmw_qos_profile_parameters (Constructor, accepts QoS
+  // initialization parameters, defaults to rmw_qos_profile_parameters)
+  explicit ParametersQoS(
+      const QoSInitialization& qos_initialization =
+          (QoSInitialization::from_rmw(rmw_qos_profile_parameters)));
 };
 
 /**
- * Services QoS class
- *    - History: Keep last,
- *    - Depth: 10,
- *    - Reliability: Reliable,
- *    - Durability: Volatile,
- *    - Deadline: Default,
- *    - Lifespan: Default,
- *    - Liveliness: System default,
- *    - Liveliness lease duration: default,
- *    - Avoid ros namespace conventions: false
+ * @brief Services QoS 类 (Services QoS class)
+ *    - 历史: 保留最后一条 (History: Keep last),
+ *    - 深度: 10 (Depth: 10),
+ *    - 可靠性: 可靠的 (Reliability: Reliable),
+ *    - 持久性: 易失性的 (Durability: Volatile),
+ *    - 截止日期: 默认值 (Deadline: Default),
+ *    - 生命周期: 默认值 (Lifespan: Default),
+ *    - 活跃性: 系统默认 (Liveliness: System default),
+ *    - 活跃性租期: 默认值 (Liveliness lease duration: default),
+ *    - 避免 ROS 命名空间约定: 否 (Avoid ros namespace conventions: false)
  */
-class RCLCPP_PUBLIC ServicesQoS : public QoS
-{
+class RCLCPP_PUBLIC ServicesQoS : public QoS {
 public:
-  explicit
-  ServicesQoS(
-    const QoSInitialization & qos_initialization = (
-      QoSInitialization::from_rmw(rmw_qos_profile_services_default)
-  ));
+  // 构造函数，接受 QoS 初始化参数，默认为 rmw_qos_profile_services_default (Constructor, accepts
+  // QoS initialization parameters, defaults to rmw_qos_profile_services_default)
+  explicit ServicesQoS(
+      const QoSInitialization& qos_initialization =
+          (QoSInitialization::from_rmw(rmw_qos_profile_services_default)));
 };
 
 /**
- * Parameter events QoS class
- *    - History: Keep last,
- *    - Depth: 1000,
- *    - Reliability: Reliable,
- *    - Durability: Volatile,
- *    - Deadline: Default,
- *    - Lifespan: Default,
- *    - Liveliness: System default,
- *    - Liveliness lease duration: default,
- *    - Avoid ros namespace conventions: false
+ * @brief Parameter events QoS 类 (Parameter events QoS class)
+ *    - 历史: 保留最后一条 (History: Keep last),
+ *    - 深度: 1000 (Depth: 1000),
+ *    - 可靠性: 可靠的 (Reliability: Reliable),
+ *    - 持久性: 易失性的 (Durability: Volatile),
+ *    - 截止日期: 默认值 (Deadline: Default),
+ *    - 生命周期: 默认值 (Lifespan: Default),
+ *    - 活跃性: 系统默认 (Liveliness: System default),
+ *    - 活跃性租期: 默认值 (Liveliness lease duration: default),
+ *    - 避免 ROS 命名空间约定: 否 (Avoid ros namespace conventions: false)
  */
-class RCLCPP_PUBLIC ParameterEventsQoS : public QoS
-{
+class RCLCPP_PUBLIC ParameterEventsQoS : public QoS {
 public:
-  explicit
-  ParameterEventsQoS(
-    const QoSInitialization & qos_initialization = (
-      QoSInitialization::from_rmw(rmw_qos_profile_parameter_events)
-  ));
+  // 构造函数，接受 QoS 初始化参数，默认为 rmw_qos_profile_parameter_events (Constructor, accepts
+  // QoS initialization parameters, defaults to rmw_qos_profile_parameter_events)
+  explicit ParameterEventsQoS(
+      const QoSInitialization& qos_initialization =
+          (QoSInitialization::from_rmw(rmw_qos_profile_parameter_events)));
 };
 
 /**
- * Rosout QoS class
- *    - History: Keep last,
- *    - Depth: 1000,
- *    - Reliability: Reliable,
- *    - Durability: TRANSIENT_LOCAL,
- *    - Deadline: Default,
- *    - Lifespan: {10, 0},
- *    - Liveliness: System default,
- *    - Liveliness lease duration: default,
- *    - Avoid ros namespace conventions: false
+ * @brief Rosout QoS 类 (Rosout QoS class)
+ *    - 历史: 保留最后一条 (History: Keep last),
+ *    - 深度: 1000 (Depth: 1000),
+ *    - 可靠性: 可靠的 (Reliability: Reliable),
+ *    - 持久性: TRANSIENT_LOCAL (Durability: TRANSIENT_LOCAL),
+ *    - 截止日期: 默认值 (Deadline: Default),
+ *    - 生命周期: {10, 0} (Lifespan: {10, 0}),
+ *    - 活跃性: 系统默认 (Liveliness: System default),
+ *    - 活跃性租期: 默认值 (Liveliness lease duration: default),
+ *    - 避免 ROS 命名空间约定: 否 (Avoid ros namespace conventions: false)
  */
-class RCLCPP_PUBLIC RosoutQoS : public QoS
-{
+class RCLCPP_PUBLIC RosoutQoS : public QoS {
 public:
-  explicit
-  RosoutQoS(
-    const QoSInitialization & rosout_qos_initialization = (
-      QoSInitialization::from_rmw(rcl_qos_profile_rosout_default)
-  ));
+  // 构造函数，接受 QoS 初始化参数，默认为 rcl_qos_profile_rosout_default (Constructor, accepts QoS
+  // initialization parameters, defaults to rcl_qos_profile_rosout_default)
+  explicit RosoutQoS(
+      const QoSInitialization& rosout_qos_initialization =
+          (QoSInitialization::from_rmw(rcl_qos_profile_rosout_default)));
 };
 
 /**
- * System defaults QoS class
- *    - History: System default,
- *    - Depth: System default,
- *    - Reliability: System default,
- *    - Durability: System default,
- *    - Deadline: Default,
- *    - Lifespan: Default,
- *    - Liveliness: System default,
- *    - Liveliness lease duration: System default,
- *    - Avoid ros namespace conventions: false
+ * @brief 系统默认QoS类 (System defaults QoS class)
+ *    - 历史: 系统默认, (History: System default,)
+ *    - 深度: 系统默认, (Depth: System default,)
+ *    - 可靠性: 系统默认, (Reliability: System default,)
+ *    - 持久性: 系统默认, (Durability: System default,)
+ *    - 截止日期: 默认, (Deadline: Default,)
+ *    - 生命周期: 默认, (Lifespan: Default,)
+ *    - 活跃度: 系统默认, (Liveliness: System default,)
+ *    - 活跃度租约期限: 系统默认, (Liveliness lease duration: System default,)
+ *    - 避免ros命名空间约定: false (Avoid ros namespace conventions: false)
  */
-class RCLCPP_PUBLIC SystemDefaultsQoS : public QoS
-{
+class RCLCPP_PUBLIC SystemDefaultsQoS : public QoS {
 public:
-  explicit
-  SystemDefaultsQoS(
-    const QoSInitialization & qos_initialization = (
-      QoSInitialization::from_rmw(rmw_qos_profile_system_default)
-  ));
+  /**
+   * @brief 构造函数，初始化系统默认QoS (Constructor to initialize system default QoS)
+   *
+   * @param qos_initialization QoS初始化参数，默认为系统默认配置 (QoS initialization parameter,
+   * default is system default configuration)
+   */
+  explicit SystemDefaultsQoS(
+      const QoSInitialization& qos_initialization =
+          (QoSInitialization::from_rmw(rmw_qos_profile_system_default)));
 };
 
 /**
- * Best available QoS class
+ * @brief 最佳可用QoS类 (Best available QoS class)
  *
- * Match majority of endpoints currently available while maintaining the highest level of service.
+ * 在维持最高服务水平的同时匹配当前可用的大多数端点。
+ * 创建订阅或发布者时选择策略。
+ * 即使一个或多个策略与新发现的端点不兼容，中间件也不会在创建订阅或发布者后更新策略。
+ * 因此，由于与发现的竞争，应谨慎使用此配置文件，因为可能会出现非确定性行为。
+ *
+ * (Match majority of endpoints currently available while maintaining the highest level of service.
  * Policies are chosen at the time of creating a subscription or publisher.
  * The middleware is not expected to update policies after creating a subscription or publisher,
  * even if one or more policies are incompatible with newly discovered endpoints.
  * Therefore, this profile should be used with care since non-deterministic behavior can occur due
- * to races with discovery.
+ * to races with discovery.)
  *
- *    - History: Keep last,
- *    - Depth: 10,
- *    - Reliability: Best available,
- *    - Durability: Best available,
- *    - Deadline: Best available,
- *    - Lifespan: Default,
- *    - Liveliness: Best available,
- *    - Liveliness lease duration: Best available,
- *    - avoid ros namespace conventions: false
+ *    - 历史: 保留最后, (History: Keep last,)
+ *    - 深度: 10, (Depth: 10,)
+ *    - 可靠性: 最佳可用, (Reliability: Best available,)
+ *    - 持久性: 最佳可用, (Durability: Best available,)
+ *    - 截止日期: 最佳可用, (Deadline: Best available,)
+ *    - 生命周期: 默认, (Lifespan: Default,)
+ *    - 活跃度: 最佳可用, (Liveliness: Best available,)
+ *    - 活跃度租约期限: 最佳可用, (Liveliness lease duration: Best available,)
+ *    - 避免ros命名空间约定: false (avoid ros namespace conventions: false)
  */
-class RCLCPP_PUBLIC BestAvailableQoS : public QoS
-{
+class RCLCPP_PUBLIC BestAvailableQoS : public QoS {
 public:
-  explicit
-  BestAvailableQoS(
-    const QoSInitialization & qos_initialization = (
-      QoSInitialization::from_rmw(rmw_qos_profile_best_available)
-  ));
+  /**
+   * @brief 构造函数，初始化最佳可用QoS (Constructor to initialize best available QoS)
+   *
+   * @param qos_initialization QoS初始化参数，默认为最佳可用配置 (QoS initialization parameter,
+   * default is best available configuration)
+   */
+  explicit BestAvailableQoS(
+      const QoSInitialization& qos_initialization =
+          (QoSInitialization::from_rmw(rmw_qos_profile_best_available)));
 };
 
 }  // namespace rclcpp

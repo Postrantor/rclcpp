@@ -20,115 +20,114 @@
 #include <stdexcept>
 
 #include "rcl/wait.h"
-
 #include "rclcpp/macros.hpp"
 #include "rclcpp/wait_result_kind.hpp"
 
-namespace rclcpp
-{
+namespace rclcpp {
 
 // TODO(wjwwood): the union-like design of this class could be replaced with
 //   std::variant, when we have access to that...
 /// Interface for introspecting a wait set after waiting on it.
 /**
+ * 这个类：
  * This class:
  *
+ *   - 提供等待的结果，即 ready、timeout 或 empty。
  *   - provides the result of waiting, i.e. ready, timeout, or empty, and
+ *   - 在需要时持有 wait set 的实体的所有权。
  *   - holds the ownership of the entities of the wait set, if needed, and
+ *   - 为遍历 wait set 提供必要的信息。
  *   - provides the necessary information for iterating over the wait set.
  *
+ * 只要创建它的 wait set 有效，这个类就有效，
  * This class is only valid as long as the wait set which created it is valid,
+ * 并且在删除 wait set 之前必须删除它，因为它包含指向 wait set 的反向引用。
  * and it must be deleted before the wait set is deleted, as it contains a
  * back reference to the wait set.
  *
+ * rclcpp::WaitSetTemplate::wait() 返回的这个实例，
  * An instance of this, which is returned from rclcpp::WaitSetTemplate::wait(),
+ * 将导致 wait set 保持实体的所有权，因为它只持有它们的序列的引用，而不是复制。
  * will cause the wait set to keep ownership of the entities because it only
  * holds a reference to the sequences of them, rather than taking a copy.
+ * 此外，在线程安全的情况下，这个实例会导致 wait set 阻塞修改实体序列的调用，
  * Also, in the thread-safe case, an instance of this will cause the wait set,
+ * 例如添加/删除 guard condition 或 subscription 方法。
  * to block calls which modify the sequences of the entities, e.g. add/remove
  * guard condition or subscription methods.
  *
+ * \tparam WaitSetT 创建此类的 wait set 类型。
  * \tparam WaitSetT The wait set type which created this class.
  */
-template<class WaitSetT>
-class WaitResult final
-{
+template <class WaitSetT>
+class WaitResult final {
 public:
+  /// 从 "ready" 结果创建 WaitResult。
   /// Create WaitResult from a "ready" result.
   /**
+   * \param[in] wait_set 这个类将在其生命周期内保持对 wait set 的引用。
    * \param[in] wait_set A reference to the wait set, which this class
    *   will keep for the duration of its lifetime.
+   * \return 一个来自 "ready" 结果的 WaitResult。
    * \return a WaitResult from a "ready" result.
    */
-  static
-  WaitResult
-  from_ready_wait_result_kind(WaitSetT & wait_set)
-  {
+  static WaitResult from_ready_wait_result_kind(WaitSetT& wait_set) {
     return WaitResult(WaitResultKind::Ready, wait_set);
   }
 
+  /// 从 "timeout" 结果创建 WaitResult。
   /// Create WaitResult from a "timeout" result.
-  static
-  WaitResult
-  from_timeout_wait_result_kind()
-  {
-    return WaitResult(WaitResultKind::Timeout);
-  }
+  static WaitResult from_timeout_wait_result_kind() { return WaitResult(WaitResultKind::Timeout); }
 
+  /// 从 "empty" 结果创建 WaitResult。
   /// Create WaitResult from a "empty" result.
-  static
-  WaitResult
-  from_empty_wait_result_kind()
-  {
-    return WaitResult(WaitResultKind::Empty);
-  }
+  static WaitResult from_empty_wait_result_kind() { return WaitResult(WaitResultKind::Empty); }
 
+  /// 返回 WaitResult 的类型。
   /// Return the kind of the WaitResult.
-  WaitResultKind
-  kind() const
-  {
-    return wait_result_kind_;
-  }
+  WaitResultKind kind() const { return wait_result_kind_; }
 
+  /// 返回 rcl wait set。
   /// Return the rcl wait set.
   /**
+   * \return const rcl wait set。
    * \return const rcl wait set.
+   * \throws std::runtime_error 如果结果不是 ready 时，类无法访问 wait set
    * \throws std::runtime_error if the class cannot access wait set when the result was not ready
    */
-  const WaitSetT &
-  get_wait_set() const
-  {
+  const WaitSetT& get_wait_set() const {
     if (this->kind() != WaitResultKind::Ready) {
       throw std::runtime_error("cannot access wait set when the result was not ready");
     }
+    // 这应该永远不会发生，仅用于防御性检查（和调试模式）。
     // This should never happen, defensive (and debug mode) check only.
     assert(wait_set_pointer_);
     return *wait_set_pointer_;
   }
 
+  /// 返回 rcl wait set。
   /// Return the rcl wait set.
   /**
+   * \return rcl wait set。
    * \return rcl wait set.
+   * \throws std::runtime_error 如果结果不是 ready 时，类无法访问 wait set
    * \throws std::runtime_error if the class cannot access wait set when the result was not ready
    */
-  WaitSetT &
-  get_wait_set()
-  {
+  WaitSetT& get_wait_set() {
     if (this->kind() != WaitResultKind::Ready) {
       throw std::runtime_error("cannot access wait set when the result was not ready");
     }
+    // 这应该永远不会发生，仅用于防御性检查（和调试模式）。
     // This should never happen, defensive (and debug mode) check only.
     assert(wait_set_pointer_);
     return *wait_set_pointer_;
   }
 
-  WaitResult(WaitResult && other) noexcept
-  : wait_result_kind_(other.wait_result_kind_),
-    wait_set_pointer_(std::exchange(other.wait_set_pointer_, nullptr))
-  {}
+  WaitResult(WaitResult&& other) noexcept
+      : wait_result_kind_(other.wait_result_kind_),
+        wait_set_pointer_(std::exchange(other.wait_set_pointer_, nullptr)) {}
 
-  ~WaitResult()
-  {
+  ~WaitResult() {
     if (wait_set_pointer_) {
       wait_set_pointer_->wait_result_release();
     }
@@ -137,26 +136,25 @@ public:
 private:
   RCLCPP_DISABLE_COPY(WaitResult)
 
-  explicit WaitResult(WaitResultKind wait_result_kind)
-  : wait_result_kind_(wait_result_kind)
-  {
+  explicit WaitResult(WaitResultKind wait_result_kind) : wait_result_kind_(wait_result_kind) {
+    // 应该由这个类的静态工厂方法强制执行。
     // Should be enforced by the static factory methods on this class.
     assert(WaitResultKind::Ready != wait_result_kind);
   }
 
-  WaitResult(WaitResultKind wait_result_kind, WaitSetT & wait_set)
-  : wait_result_kind_(wait_result_kind),
-    wait_set_pointer_(&wait_set)
-  {
+  WaitResult(WaitResultKind wait_result_kind, WaitSetT& wait_set)
+      : wait_result_kind_(wait_result_kind), wait_set_pointer_(&wait_set) {
+    // 应该由这个类的静态工厂方法强制执行。
     // Should be enforced by the static factory methods on this class.
     assert(WaitResultKind::Ready == wait_result_kind);
+    // 确保线程安全（如果提供）和共享所有权（如果需要）。
     // Secure thread-safety (if provided) and shared ownership (if needed).
     wait_set_pointer_->wait_result_acquire();
   }
 
   const WaitResultKind wait_result_kind_;
 
-  WaitSetT * wait_set_pointer_ = nullptr;
+  WaitSetT* wait_set_pointer_ = nullptr;
 };
 
 }  // namespace rclcpp

@@ -20,27 +20,32 @@
 
 #include "rclcpp/visibility_control.hpp"
 
-namespace rclcpp
-{
+namespace rclcpp {
 
+/// 返回码，用于 spin_until_future_complete 函数。
 /// Return codes to be used with spin_until_future_complete.
 /**
+ * SUCCESS: 未来已完成，可以使用 "get" 访问而无需阻塞。
+ *          这并不表示操作成功；“get”仍然可能抛出异常。
+ * INTERRUPTED: 未来尚未完成，由于 Ctrl-C 或其他错误而中断旋转。
+ * TIMEOUT: 超时旋转。
+ *
  * SUCCESS: The future is complete and can be accessed with "get" without blocking.
  *          This does not indicate that the operation succeeded; "get" may still throw an exception.
  * INTERRUPTED: The future is not complete, spinning was interrupted by Ctrl-C or another error.
  * TIMEOUT: Spinning timed out.
  */
-enum class FutureReturnCode {SUCCESS, INTERRUPTED, TIMEOUT};
+enum class FutureReturnCode { SUCCESS, INTERRUPTED, TIMEOUT };
 
+/// FutureReturnCode 的流操作符。
 /// Stream operator for FutureReturnCode.
 RCLCPP_PUBLIC
-std::ostream &
-operator<<(std::ostream & os, const FutureReturnCode & future_return_code);
+std::ostream& operator<<(std::ostream& os, const FutureReturnCode& future_return_code);
 
+/// 将 FutureReturnCode 转换为字符串的函数。
 /// String conversion function for FutureReturnCode.
 RCLCPP_PUBLIC
-std::string
-to_string(const FutureReturnCode & future_return_code);
+std::string to_string(const FutureReturnCode& future_return_code);
 
 }  // namespace rclcpp
 

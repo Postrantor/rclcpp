@@ -17,32 +17,34 @@
 
 #include "rclcpp/visibility_control.hpp"
 
-namespace rclcpp
-{
-namespace detail
-{
+namespace rclcpp {
+namespace detail {
 
+/// 用于通过ROS接口传递rmw实现特定设置的机制。
 /// Mechanism for passing rmw implementation specific settings through the ROS interfaces.
-class RCLCPP_PUBLIC RMWImplementationSpecificPayload
-{
+class RCLCPP_PUBLIC RMWImplementationSpecificPayload {
 public:
-  virtual
-  ~RMWImplementationSpecificPayload() = default;
+  /// 默认虚析构函数。
+  /// Default virtual destructor.
+  virtual ~RMWImplementationSpecificPayload() = default;
 
+  /// 如果此类未被自定义，则返回false，否则返回true。
   /// Return false if this class has not been customized, otherwise true.
   /**
+   * 它是基于此类报告的rmw实现标识符的值来实现这一点的，
+   * 因此，对于这个类的一个特化，重写get_rmw_implementation_identifier()方法
+   * 返回除nullptr之外的其他内容非常重要。
+   *
    * It does this based on the value of the rmw implementation identifier that
    * this class reports, and so it is important for a specialization of this
    * class to override the get_rmw_implementation_identifier() method to return
    * something other than nullptr.
    */
-  bool
-  has_been_customized() const;
+  bool has_been_customized() const;
 
-  /// Derrived classes should override this and return the identifier of its rmw implementation.
-  virtual
-  const char *
-  get_implementation_identifier() const;
+  /// 派生类应该重写这个方法并返回其rmw实现的标识符。
+  /// Derived classes should override this and return the identifier of its rmw implementation.
+  virtual const char* get_implementation_identifier() const;
 };
 
 }  // namespace detail

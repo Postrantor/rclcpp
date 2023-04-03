@@ -18,23 +18,35 @@
 #include "rclcpp/context.hpp"
 #include "rclcpp/visibility_control.hpp"
 
-namespace rclcpp
-{
-namespace contexts
-{
+namespace rclcpp {
+namespace contexts {
 
-class DefaultContext : public rclcpp::Context
-{
+/**
+ * @class DefaultContext
+ * @brief 默认上下文类，继承自 rclcpp::Context (Default context class, inherits from
+ * rclcpp::Context)
+ */
+class DefaultContext : public rclcpp::Context {
 public:
+  /**
+   * @brief 智能指针定义 (Smart pointer definitions)
+   */
   RCLCPP_SMART_PTR_DEFINITIONS(DefaultContext)
 
+  /**
+   * @brief 构造函数 (Constructor)
+   */
   RCLCPP_PUBLIC
   DefaultContext();
 };
 
+/**
+ * @fn DefaultContext::SharedPtr get_global_default_context()
+ * @brief 获取全局默认上下文的智能指针 (Get a shared pointer to the global default context)
+ * @return 返回全局默认上下文的智能指针 (Returns a shared pointer to the global default context)
+ */
 RCLCPP_PUBLIC
-DefaultContext::SharedPtr
-get_global_default_context();
+DefaultContext::SharedPtr get_global_default_context();
 
 }  // namespace contexts
 }  // namespace rclcpp

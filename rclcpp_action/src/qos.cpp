@@ -12,16 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <rcl_action/default_qos.h>
 #include <rclcpp_action/qos.hpp>
 
-#include <rcl_action/default_qos.h>
+namespace rclcpp_action {
 
-namespace rclcpp_action
-{
-
+/**
+ * @brief 构造函数，初始化 DefaultActionStatusQoS 对象。 (Constructor, initializes the
+ * DefaultActionStatusQoS object.)
+ *
+ * @param 无参数 (No parameters)
+ */
 DefaultActionStatusQoS::DefaultActionStatusQoS()
-: rclcpp::QoS(rclcpp::QoSInitialization::from_rmw(rcl_action_qos_profile_status_default))
-{
+    // 使用 rcl_action_qos_profile_status_default 初始化 QoS 设置。
+    // Initialize QoS settings using rcl_action_qos_profile_status_default.
+    : rclcpp::QoS(rclcpp::QoSInitialization::from_rmw(rcl_action_qos_profile_status_default)) {
+  // 将当前对象的 rmw_qos_profile 属性设置为 rcl_action_qos_profile_status_default。
+  // Set the rmw_qos_profile attribute of the current object to
+  // rcl_action_qos_profile_status_default.
   this->get_rmw_qos_profile() = rcl_action_qos_profile_status_default;
 }
 

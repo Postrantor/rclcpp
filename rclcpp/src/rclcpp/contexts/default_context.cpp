@@ -16,12 +16,22 @@
 
 using rclcpp::contexts::DefaultContext;
 
-DefaultContext::DefaultContext()
-{}
+/**
+ * @brief 默认的构造函数，创建一个 DefaultContext 对象（Default constructor for creating a
+ * DefaultContext object）
+ */
+DefaultContext::DefaultContext() {}
 
-DefaultContext::SharedPtr
-rclcpp::contexts::get_global_default_context()
-{
+/**
+ * @brief 获取全局默认上下文的函数（Function to get the global default context）
+ *
+ * @return 返回一个指向 DefaultContext 的共享指针（Returns a shared pointer to the DefaultContext）
+ */
+DefaultContext::SharedPtr rclcpp::contexts::get_global_default_context() {
+  // 定义一个静态共享指针 default_context，并使用 make_shared 初始化（Define a static shared pointer
+  // named default_context and initialize it using make_shared）
   static DefaultContext::SharedPtr default_context = DefaultContext::make_shared();
+
+  // 返回 default_context（Return the default_context）
   return default_context;
 }

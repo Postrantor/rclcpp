@@ -28,53 +28,74 @@
 #include "rclcpp/visibility_control.hpp"
 #include "rmw/rmw.h"
 
-namespace rclcpp
-{
+namespace rclcpp {
 
-class ParameterEventsFilter
-{
+/**
+ * @brief ParameterEventsFilter 类用于过滤参数事件
+ *        The ParameterEventsFilter class is used to filter parameter events.
+ */
+class ParameterEventsFilter {
 public:
   RCLCPP_SMART_PTR_DEFINITIONS(ParameterEventsFilter)
-  enum class EventType {NEW, DELETED, CHANGED};  ///< An enum for the type of event.
-  /// Used for the listed results
+
+  /**
+   * @brief EventType 枚举类型表示事件类型 (新建、删除、修改)
+   *        An enum for the type of event (NEW, DELETED, CHANGED).
+   */
+  enum class EventType { NEW, DELETED, CHANGED };
+
+  /// 用于列出结果的 EventPair 类型定义
+  /// EventPair type definition used for listing results
   using EventPair = std::pair<EventType, const rcl_interfaces::msg::Parameter *>;
 
-  /// Construct a filtered view of a parameter event.
   /**
-   * \param[in] event The parameter event message to filter.
-   * \param[in] names A list of parameter names of interest.
-   * \param[in] types A list of the types of parameter events of iterest.
-   *    EventType NEW, DELETED, or CHANGED
+   * @brief 构造一个参数事件的过滤视图。
+   *        Construct a filtered view of a parameter event.
    *
-   * Example Usage:
+   * @param[in] event 要过滤的参数事件消息。
+   *                  The parameter event message to filter.
+   * @param[in] names 感兴趣的参数名称列表。
+   *                  A list of parameter names of interest.
+   * @param[in] types 感兴趣的参数事件类型列表。
+   *                  A list of the types of parameter events of interest.
+   *                  EventType NEW, DELETED, or CHANGED
    *
-   * If you have recieved a parameter event and are only interested in parameters foo and
+   * 示例用法 (Example Usage)：
+   *
+   * 如果你收到了一个参数事件，并且只对参数 foo 和 bar 的添加或更改感兴趣，但不关心删除。
+   * If you have received a parameter event and are only interested in parameters foo and
    * bar being added or changed but don't care about deletion.
    *
    * ```cpp
    * auto res = rclcpp::ParameterEventsFilter(
    *   event_shared_ptr,
    *   {"foo", "bar"},
-   *   {rclcpp::ParameterEventsFilter::EventType::NEW, rclcpp::ParameterEventsFilter::EventType::CHANGED});
+   *   {rclcpp::ParameterEventsFilter::EventType::NEW,
+   * rclcpp::ParameterEventsFilter::EventType::CHANGED});
    * ```
    */
   RCLCPP_PUBLIC
   ParameterEventsFilter(
-    std::shared_ptr<const rcl_interfaces::msg::ParameterEvent> event,
-    const std::vector<std::string> & names,
-    const std::vector<EventType> & types);
+      std::shared_ptr<const rcl_interfaces::msg::ParameterEvent> event,
+      const std::vector<std::string> &names,
+      const std::vector<EventType> &types);
 
-  /// Get the result of the filter
   /**
-   * \return A std::vector<EventPair> of all matching parameter changes in this event.
+   * @brief 获取过滤结果
+   *        Get the result of the filter
+   *
+   * @return 匹配此事件中所有参数更改的 std::vector<EventPair>
+   *         A std::vector<EventPair> of all matching parameter changes in this event.
    */
   RCLCPP_PUBLIC
-  const std::vector<EventPair> & get_events() const;
+  const std::vector<EventPair> &get_events() const;
 
 private:
-  // access only allowed via const accessor.
-  std::vector<EventPair> result_;  ///< Storage of the resultant vector
-  std::shared_ptr<const rcl_interfaces::msg::ParameterEvent> event_;  ///< Keep event in scope
+  // 仅允许通过 const 访问器访问。
+  // Access only allowed via const accessor.
+  std::vector<EventPair> result_;  ///< 存储结果向量 Storage of the resultant vector
+  std::shared_ptr<const rcl_interfaces::msg::ParameterEvent>
+      event_;                      ///< 保持事件在作用域内 Keep event in scope
 };
 
 }  // namespace rclcpp

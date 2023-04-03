@@ -19,77 +19,86 @@
 #include <stdexcept>
 #include <string>
 
-#include "rclcpp/visibility_control.hpp"
-
 #include "rcl/types.h"
-
+#include "rclcpp/visibility_control.hpp"
 #include "rosidl_runtime_c/message_type_support_struct.h"
-
 #include "rosidl_typesupport_cpp/message_type_support.hpp"
 
-namespace rclcpp
-{
+namespace rclcpp {
 
 class SerializedMessage;
 
-namespace serialization_traits
-{
-// trait to check if type is the object oriented serialized message
-template<typename T>
-struct is_serialized_message_class : std::false_type
-{};
+// 序列化特征命名空间
+// Serialization traits namespace
+namespace serialization_traits {
+// 检查类型是否为面向对象的序列化消息
+// Trait to check if type is the object-oriented serialized message
+template <typename T>
+struct is_serialized_message_class : std::false_type {};
 
-template<>
-struct is_serialized_message_class<SerializedMessage>: std::true_type
-{};
+// 特化SerializedMessage类型的is_serialized_message_class
+// Specialize is_serialized_message_class for SerializedMessage type
+template <>
+struct is_serialized_message_class<SerializedMessage> : std::true_type {};
 }  // namespace serialization_traits
 
-/// Interface to (de)serialize a message
-class RCLCPP_PUBLIC_TYPE SerializationBase
-{
+// (反)序列化消息的接口
+// Interface to (de)serialize a message
+class RCLCPP_PUBLIC_TYPE SerializationBase {
 public:
-  /// Constructor of SerializationBase
+  // SerializationBase的构造函数
+  // Constructor of SerializationBase
   /**
+   * \param[in] type_support 用于序列化和反序列化的消息类型支持句柄
    * \param[in] type_support handle for the message type support
    * to be used for serialization and deserialization.
    */
-  explicit SerializationBase(const rosidl_message_type_support_t * type_support);
+  explicit SerializationBase(const rosidl_message_type_support_t* type_support);
 
-  /// Destructor of SerializationBase
+  // SerializationBase的析构函数
+  // Destructor of SerializationBase
   virtual ~SerializationBase() = default;
 
-  /// Serialize a ROS2 message to a serialized stream
+  // 将ROS2消息序列化到序列化流中
+  // Serialize a ROS2 message to a serialized stream
   /**
+   * \param[in] ros_message 被rmw读取并序列化的ROS2消息
    * \param[in] ros_message The ROS2 message which is read and serialized by rmw.
+   * \param[out] serialized_message 序列化后的消息
    * \param[out] serialized_message The serialized message.
    */
-  void serialize_message(
-    const void * ros_message, SerializedMessage * serialized_message) const;
+  void serialize_message(const void* ros_message, SerializedMessage* serialized_message) const;
 
-  /// Deserialize a serialized stream to a ROS message
+  // 将序列化流反序列化为ROS消息
+  // Deserialize a serialized stream to a ROS message
   /**
+   * \param[in] serialized_message 要被rmw转换为ROS2的序列化消息
    * \param[in] serialized_message The serialized message to be converted to ROS2 by rmw.
+   * \param[out] ros_message 反序列化后的ROS2消息
    * \param[out] ros_message The deserialized ROS2 message.
    */
-  void deserialize_message(
-    const SerializedMessage * serialized_message, void * ros_message) const;
+  void deserialize_message(const SerializedMessage* serialized_message, void* ros_message) const;
 
 private:
-  const rosidl_message_type_support_t * type_support_;
+  // 消息类型支持句柄
+  // Message type support handle
+  const rosidl_message_type_support_t* type_support_;
 };
 
-/// Default implementation to (de)serialize a message by using rmw_(de)serialize
-template<typename MessageT>
-class Serialization : public SerializationBase
-{
+// 使用rmw_(de)serialize对消息进行(反)序列化的默认实现
+// Default implementation to (de)serialize a message by using rmw_(de)serialize
+template <typename MessageT>
+class Serialization : public SerializationBase {
 public:
-  /// Constructor of Serialization
+  // Serialization的构造函数
+  // Constructor of Serialization
   Serialization()
-  : SerializationBase(rosidl_typesupport_cpp::get_message_type_support_handle<MessageT>())
-  {
+      : SerializationBase(rosidl_typesupport_cpp::get_message_type_support_handle<MessageT>()) {
+    // 静态断言，不允许将序列化消息序列化为序列化消息
+    // Static assertion, serialization of serialized message to serialized message is not possible.
     static_assert(
-      !serialization_traits::is_serialized_message_class<MessageT>::value,
-      "Serialization of serialized message to serialized message is not possible.");
+        !serialization_traits::is_serialized_message_class<MessageT>::value,
+        "Serialization of serialized message to serialized message is not possible.");
   }
 };
 

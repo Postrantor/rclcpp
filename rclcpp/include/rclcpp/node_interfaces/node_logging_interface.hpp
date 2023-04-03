@@ -22,38 +22,39 @@
 #include "rclcpp/node_interfaces/detail/node_interfaces_helpers.hpp"
 #include "rclcpp/visibility_control.hpp"
 
-namespace rclcpp
-{
-namespace node_interfaces
-{
+namespace rclcpp {
+namespace node_interfaces {
 
+/// 纯虚拟接口类，用于 Node API 的 NodeLogging 部分。
 /// Pure virtual interface class for the NodeLogging part of the Node API.
-class NodeLoggingInterface
-{
+class NodeLoggingInterface {
 public:
+  // 只使用智能指针别名（不允许复制和赋值）
+  // Use smart pointer aliases only (disallow copy and assignment)
   RCLCPP_SMART_PTR_ALIASES_ONLY(NodeLoggingInterface)
 
+  // 公共虚析构函数，使用默认实现
+  // Public virtual destructor with default implementation
   RCLCPP_PUBLIC
-  virtual
-  ~NodeLoggingInterface() = default;
+  virtual ~NodeLoggingInterface() = default;
 
+  /// 返回节点的日志记录器。
   /// Return the logger of the node.
   /**
+   * \return 节点的日志记录器。
    * \return The logger of the node.
    */
   RCLCPP_PUBLIC
-  virtual
-  rclcpp::Logger
-  get_logger() const = 0;
+  virtual rclcpp::Logger get_logger() const = 0;
 
+  /// 返回与节点关联的日志记录器名称。
   /// Return the logger name associated with the node.
   /**
+   * \return 与节点关联的日志记录器名称。
    * \return The logger name associated with the node.
    */
   RCLCPP_PUBLIC
-  virtual
-  const char *
-  get_logger_name() const = 0;
+  virtual const char* get_logger_name() const = 0;
 };
 
 }  // namespace node_interfaces

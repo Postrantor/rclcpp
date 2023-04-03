@@ -16,99 +16,99 @@
 #define RCLCPP_LIFECYCLE__NODE_INTERFACES__LIFECYCLE_NODE_INTERFACE_HPP_
 
 #include "lifecycle_msgs/msg/transition.hpp"
-
+#include "rclcpp/node_interfaces/detail/node_interfaces_helpers.hpp"
 #include "rclcpp_lifecycle/state.hpp"
 #include "rclcpp_lifecycle/visibility_control.h"
-#include "rclcpp/node_interfaces/detail/node_interfaces_helpers.hpp"
 
-namespace rclcpp_lifecycle
-{
-namespace node_interfaces
-{
-/// Interface class for a managed node.
-/** Virtual functions as defined in
+namespace rclcpp_lifecycle {
+namespace node_interfaces {
+/// 生命周期节点接口类 (Interface class for a managed node).
+/** 虚拟函数定义如下 (Virtual functions as defined in)
  * http://design.ros2.org/articles/node_lifecycle.html
  *
- * If the callback function returns successfully,
- * the specified transition is completed.
- * If the callback function fails or throws an
- * uncaught exception, the on_error function is
- * called.
- * By default, all functions remain optional to overwrite
- * and return true. Except the on_error function, which
- * returns false and thus goes to shutdown/finalize state.
+ * 如果回调函数执行成功 (If the callback function returns successfully),
+ * 则完成指定的转换 (the specified transition is completed).
+ * 如果回调函数失败或抛出未捕获的异常 (If the callback function fails or throws an),
+ * 则调用on_error函数 (uncaught exception, the on_error function is called).
+ * 默认情况下，所有函数都可以选择覆写 (By default, all functions remain optional to overwrite)
+ * 并返回true。除了on_error函数，该函数 (and return true. Except the on_error function, which)
+ * 返回false，从而进入关闭/最终状态 (returns false and thus goes to shutdown/finalize state).
  */
-class LifecycleNodeInterface
-{
+class LifecycleNodeInterface {
 protected:
+  // RCLCPP_LIFECYCLE_PUBLIC宏用于声明符号可见性 (RCLCPP_LIFECYCLE_PUBLIC macro is used for
+  // declaring symbol visibility)
   RCLCPP_LIFECYCLE_PUBLIC
+  // 生命周期节点接口构造函数 (LifecycleNodeInterface constructor)
   LifecycleNodeInterface() {}
 
 public:
-  enum class CallbackReturn : uint8_t
-  {
+  // 定义回调返回值的枚举类 (Define an enumeration class for callback return values)
+  enum class CallbackReturn : uint8_t {
+    // 成功状态，对应于 TRANSITION_CALLBACK_SUCCESS (Success state, corresponds to
+    // TRANSITION_CALLBACK_SUCCESS)
     SUCCESS = lifecycle_msgs::msg::Transition::TRANSITION_CALLBACK_SUCCESS,
+    // 失败状态，对应于 TRANSITION_CALLBACK_FAILURE (Failure state, corresponds to
+    // TRANSITION_CALLBACK_FAILURE)
     FAILURE = lifecycle_msgs::msg::Transition::TRANSITION_CALLBACK_FAILURE,
+    // 错误状态，对应于 TRANSITION_CALLBACK_ERROR (Error state, corresponds to
+    // TRANSITION_CALLBACK_ERROR)
     ERROR = lifecycle_msgs::msg::Transition::TRANSITION_CALLBACK_ERROR
   };
 
-  /// Callback function for configure transition
-  /*
-   * \return SUCCESS by default
+  /// 配置过渡的回调函数 (Callback function for configure transition)
+  /**
+   * \param previous_state 上一个状态 (The previous state)
+   * \return 默认返回 SUCCESS (Returns SUCCESS by default)
    */
   RCLCPP_LIFECYCLE_PUBLIC
-  virtual CallbackReturn
-  on_configure(const State & previous_state);
+  virtual CallbackReturn on_configure(const State& previous_state);
 
-  /// Callback function for cleanup transition
-  /*
-   * \return SUCCESS by default
+  /// 清理过渡的回调函数 (Callback function for cleanup transition)
+  /**
+   * \param previous_state 上一个状态 (The previous state)
+   * \return 默认返回 SUCCESS (Returns SUCCESS by default)
    */
   RCLCPP_LIFECYCLE_PUBLIC
-  virtual CallbackReturn
-  on_cleanup(const State & previous_state);
+  virtual CallbackReturn on_cleanup(const State& previous_state);
 
-  /// Callback function for shutdown transition
-  /*
-   * \return SUCCESS by default
+  /// 关闭过渡的回调函数 (Callback function for shutdown transition)
+  /**
+   * \param previous_state 上一个状态 (The previous state)
+   * \return 默认返回 SUCCESS (Returns SUCCESS by default)
    */
   RCLCPP_LIFECYCLE_PUBLIC
-  virtual CallbackReturn
-  on_shutdown(const State & previous_state);
+  virtual CallbackReturn on_shutdown(const State& previous_state);
 
   /// Callback function for activate transition
   /*
    * \return SUCCESS by default
    */
   RCLCPP_LIFECYCLE_PUBLIC
-  virtual CallbackReturn
-  on_activate(const State & previous_state);
+  virtual CallbackReturn on_activate(const State& previous_state);
 
   /// Callback function for deactivate transition
   /*
    * \return SUCCESS by default
    */
   RCLCPP_LIFECYCLE_PUBLIC
-  virtual CallbackReturn
-  on_deactivate(const State & previous_state);
+  virtual CallbackReturn on_deactivate(const State& previous_state);
 
   /// Callback function for errorneous transition
   /*
    * \return SUCCESS by default
    */
   RCLCPP_LIFECYCLE_PUBLIC
-  virtual CallbackReturn
-  on_error(const State & previous_state);
+  virtual CallbackReturn on_error(const State& previous_state);
 
   RCLCPP_LIFECYCLE_PUBLIC
-  virtual
-  ~LifecycleNodeInterface() {}
+  virtual ~LifecycleNodeInterface() {}
 };
 
 }  // namespace node_interfaces
 }  // namespace rclcpp_lifecycle
 
 RCLCPP_NODE_INTERFACE_HELPERS_SUPPORT(
-  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface, lifecycle_node)
+    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface, lifecycle_node)
 
 #endif  // RCLCPP_LIFECYCLE__NODE_INTERFACES__LIFECYCLE_NODE_INTERFACE_HPP_
