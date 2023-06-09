@@ -21,9 +21,9 @@
 namespace rclcpp {
 namespace memory_strategies {
 
-/// 创建一个 MemoryStrategy sharedPtr（Create a MemoryStrategy sharedPtr）
+/// 创建一个 MemoryStrategy sharedPtr
 /**
- * \return 一个 MemoryStrategy sharedPtr（a MemoryStrategy sharedPtr）
+ * \return 一个 MemoryStrategy sharedPtr
  */
 RCLCPP_PUBLIC
 memory_strategy::MemoryStrategy::SharedPtr create_default_strategy();

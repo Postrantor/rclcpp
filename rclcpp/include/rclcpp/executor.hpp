@@ -452,24 +452,22 @@ public:
     std::chrono::nanoseconds timeout_left =
         timeout_ns;  // 初始化剩余超时时间（Initialize the remaining timeout duration）
 
+    // 如果已经在旋转，则抛出异常（Throw an exception if already spinning）
     if (spinning.exchange(true)) {
-      throw std::runtime_error(
-          "spin_until_future_complete() called while already spinning");  // 如果已经在旋转，则抛出异常（Throw
-                                                                          // an exception if already
-                                                                          // spinning）
+      throw std::runtime_error("spin_until_future_complete() called while already spinning");
     }
     RCPPUTILS_SCOPE_EXIT(this->spinning.store(false););
     while (rclcpp::ok(this->context_) && spinning.load()) {
-      // 当上下文有效且正在旋转时执行循环（Execute the loop while the context is valid and
-      // spinning） Do one item of work.
+      // 当上下文有效且正在旋转时执行循环
+      // （Execute the loop while the context is valid and spinning） Do one item of work.
       spin_once_impl(timeout_left);  // 执行一次旋转实现（Perform a single spin implementation）
 
       // Check if the future is set, return SUCCESS if it is.
       status = future.wait_for(
           std::chrono::seconds(0));  // 检查未来是否已设置（Check if the future is set）
+      // 如果未来已准备好，返回成功（Return success if the future is ready）
       if (status == std::future_status::ready) {
-        return FutureReturnCode::SUCCESS;  // 如果未来已准备好，返回成功（Return success if the
-                                           // future is ready）
+        return FutureReturnCode::SUCCESS;
       }
       // If the original timeout is < 0, then this is blocking, never TIMEOUT.
       if (timeout_ns < std::chrono::nanoseconds::zero()) {
@@ -490,9 +488,8 @@ public:
     }
 
     // The future did not complete before ok() returned false, return INTERRUPTED.
-    return FutureReturnCode::INTERRUPTED;  // 在ok()返回false之前，未来未完成，返回中断（The future
-                                           // did not complete before ok() returned false, return
-                                           // interrupted）
+    // 在ok()返回false之前，未来未完成，返回中断
+    return FutureReturnCode::INTERRUPTED;
   }
 
   /// 取消任何正在运行的 spin* 函数，使其返回。

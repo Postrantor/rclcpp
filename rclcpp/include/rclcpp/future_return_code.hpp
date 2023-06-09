@@ -38,12 +38,10 @@ namespace rclcpp {
 enum class FutureReturnCode { SUCCESS, INTERRUPTED, TIMEOUT };
 
 /// FutureReturnCode 的流操作符。
-/// Stream operator for FutureReturnCode.
 RCLCPP_PUBLIC
 std::ostream& operator<<(std::ostream& os, const FutureReturnCode& future_return_code);
 
 /// 将 FutureReturnCode 转换为字符串的函数。
-/// String conversion function for FutureReturnCode.
 RCLCPP_PUBLIC
 std::string to_string(const FutureReturnCode& future_return_code);
 

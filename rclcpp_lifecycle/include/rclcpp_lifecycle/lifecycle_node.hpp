@@ -35,14 +35,14 @@
 
 /** \mainpage rclcpp_lifecycle: 包含生命周期实现的原型的包。
  *
- * - 生命周期状态：定义 State 类。有 4 个主要状态：Unconfigured（未配置）, Inactive（非活动）,
- *   Active（活动）和 Finalized（最终状态）。还有 6 个过渡状态，这些状态在请求过渡期间是中间状态。
- *   Configuring（配置中）, CleaningUp（清理中）, ShuttingDown（关闭中）, Activating（激活中）,
- *   Deactivating（停用中）和 ErrorProcessing（错误处理中）。
+ * - 生命周期状态：定义 State 类。有 4 个主要状态：Unconfigured(未配置), Inactive(非活动),
+ *   Active(活动)和 Finalized(最终状态)。还有 6 个过渡状态，这些状态在请求过渡期间是中间状态。
+ *   Configuring(配置中), CleaningUp(清理中), ShuttingDown(关闭中), Activating(激活中),
+ *   Deactivating(停用中)和 ErrorProcessing(错误处理中)。
  *   - rclcpp_lifecycle/state.hpp
  * - 生命周期转换：定义 Transition 类。有 7 种转换暴露给监督过程，它们是：
- *   create（创建）, configure（配置）, cleanup（清理）, activate（激活）, deactivate（停用）,
- *   shutdown（关闭）和 destroy（销毁）。
+ *   create(创建), configure(配置), cleanup(清理), activate(激活), deactivate(停用),
+ *   shutdown(关闭)和 destroy(销毁)。
  *   - rclcpp_lifecycle/transition.hpp
  * - 生命周期发布器：创建一个发布器，允许启用和禁用消息发布。
  *   - rclcpp_lifecycle/publisher.hpp
@@ -261,16 +261,16 @@ public:
   /// Create and return a Subscription.
   /**
    * \param[in] topic_name 要订阅的主题。
-   * \param[in] topic_name The topic to subscribe on.
    * \param[in] callback 用户定义的回调函数。
-   * \param[in] callback The user-defined callback function.
    * \param[in] qos 此订阅的服务质量。
-   * \param[in] qos The quality of service for this subscription.
    * \param[in] options 此订阅的订阅选项。
-   * \param[in] options The subscription options for this subscription.
    * \param[in] msg_mem_strat 用于分配消息的消息内存策略。
-   * \param[in] msg_mem_strat The message memory strategy to use for allocating messages.
    * \return 创建的订阅的共享指针。
+   * \param[in] topic_name The topic to subscribe on.
+   * \param[in] callback The user-defined callback function.
+   * \param[in] qos The quality of service for this subscription.
+   * \param[in] options The subscription options for this subscription.
+   * \param[in] msg_mem_strat The message memory strategy to use for allocating messages.
    * \return Shared pointer to the created subscription.
    */
   template <
@@ -570,9 +570,9 @@ public:
    */
   template <typename ParameterT>
   bool get_parameter_or(
-    const std::string & name, ///< 参数名（Parameter name）
-    ParameterT & value, ///< 存储获取到的参数值的变量（Variable to store the obtained parameter value）
-    const ParameterT & alternative_value ///< 如果参数未设置，则使用此替代值（Alternative value to be used if the parameter is not set）) const;
+    const std::string & name, ///< 参数名(Parameter name)
+    ParameterT & value, ///< 存储获取到的参数值的变量(Variable to store the obtained parameter value)
+    const ParameterT & alternative_value ///< 如果参数未设置，则使用此替代值(Alternative value to be used if the parameter is not set)) const;
 
   /// 根据给定的参数名称返回参数。
   /// Return the parameters by the given parameter names.
@@ -580,7 +580,7 @@ public:
    * \sa rclcpp::Node::get_parameters
    */
   RCLCPP_LIFECYCLE_PUBLIC
-  std::vector<rclcpp::Parameter> get_parameters(const std::vector<std::string> & names) const; ///< 参数名称列表（List of parameter names）
+  std::vector<rclcpp::Parameter> get_parameters(const std::vector<std::string> & names) const; ///< 参数名称列表(List of parameter names)
 
   /// 获取具有给定前缀的所有参数的参数值。
   /// Get the parameter values for all parameters that have a given prefix.
@@ -589,8 +589,8 @@ public:
    */
   template <typename MapValueT>
   bool get_parameters(
-    const std::string & prefix, ///< 参数名前缀（Parameter name prefix）
-    std::map<std::string, MapValueT> & values) const; ///< 存储获取到的参数值的映射（Map to store the obtained parameter values）
+    const std::string & prefix, ///< 参数名前缀(Parameter name prefix)
+    std::map<std::string, MapValueT> & values) const; ///< 存储获取到的参数值的映射(Map to store the obtained parameter values)
 
   /// 返回给定参数名称的参数描述符。
   /// Return the parameter descriptor for the given parameter name.
@@ -598,7 +598,7 @@ public:
    * \sa rclcpp::Node::describe_parameter
    */
   RCLCPP_LIFECYCLE_PUBLIC
-  rcl_interfaces::msg::ParameterDescriptor describe_parameter(const std::string & name) const; ///< 参数名称（Parameter name）
+  rcl_interfaces::msg::ParameterDescriptor describe_parameter(const std::string & name) const; ///< 参数名称(Parameter name)
 
   /// 返回参数描述符向量，每个给定名称一个。
   /// Return a vector of parameter descriptors, one for each of the given names.
@@ -607,7 +607,7 @@ public:
    */
   RCLCPP_LIFECYCLE_PUBLIC
   std::vector<rcl_interfaces::msg::ParameterDescriptor>
-  describe_parameters(const std::vector<std::string> & names) const; ///< 参数名称列表（List of parameter names）
+  describe_parameters(const std::vector<std::string> & names) const; ///< 参数名称列表(List of parameter names)
 
   /// 返回参数类型向量，每个给定名称一个。
   /// Return a vector of parameter types, one for each of the given names.
@@ -615,7 +615,7 @@ public:
    * \sa rclcpp::Node::get_parameter_types
    */
   RCLCPP_LIFECYCLE_PUBLIC
-  std::vector<uint8_t> get_parameter_types(const std::vector<std::string> & names) const; ///< 参数名称列表（List of parameter names）
+  std::vector<uint8_t> get_parameter_types(const std::vector<std::string> & names) const; ///< 参数名称列表(List of parameter names)
 
   /// 返回具有任何给定前缀的参数列表，最大深度为给定值。
   /// Return a list of parameters with any of the given prefixes, up to the given depth.
@@ -625,8 +625,8 @@ public:
   RCLCPP_LIFECYCLE_PUBLIC
   rcl_interfaces::msg::ListParametersResult
   list_parameters(
-    const std::vector<std::string> & prefixes, ///< 参数名前缀列表（List of parameter name prefixes）
-    uint64_t depth) const; ///< 列表参数的最大深度（Maximum depth for listing parameters）
+    const std::vector<std::string> & prefixes, ///< 参数名前缀列表(List of parameter name prefixes)
+    uint64_t depth) const; ///< 列表参数的最大深度(Maximum depth for listing parameters)
 
   using PreSetParametersCallbackHandle = rclcpp::node_interfaces::PreSetParametersCallbackHandle;
   using PreSetParametersCallbackType =
@@ -717,7 +717,7 @@ public:
   void remove_post_set_parameters_callback(
     const rclcpp_lifecycle::LifecycleNode::PostSetParametersCallbackHandle * const handler);
 
-  /// 返回现有节点名称（字符串）的向量。
+  /// 返回现有节点名称(字符串)的向量。
   /// Return a vector of existing node names (string).
   /**
    * \sa rclcpp::Node::get_node_names

@@ -53,13 +53,6 @@ namespace {
  * @param extension 要添加的子命名空间扩展
  * @return 返回新的子命名空间字符串
  * @throws rclcpp::exceptions::NameValidationError 如果子命名空间扩展为空或以'/'开头
- *
- * @brief Extend sub-namespace
- * @param existing_sub_namespace The existing sub-namespace
- * @param extension The sub-namespace extension to be added
- * @return Returns the new sub-namespace string
- * @throws rclcpp::exceptions::NameValidationError if the sub-namespace extension is empty or starts
- * with '/'
  */
 RCLCPP_LOCAL
 std::string extend_sub_namespace(

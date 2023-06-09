@@ -146,8 +146,7 @@ typename std::shared_ptr<SubscriptionT> create_subscription(
   auto factory = rclcpp::create_subscription_factory<MessageT>(
       std::forward<CallbackT>(callback), options, msg_mem_strat, subscription_topic_stats);
 
-  // 获取实际的QoS配置，如果有QoS覆盖选项，则声明QoS参数 (Get the actual QoS
-  // configuration, declare QoS parameters if there are QoS overriding options)
+  // 获取实际的QoS配置，如果有QoS覆盖选项，则声明QoS参数
   const rclcpp::QoS& actual_qos = options.qos_overriding_options.get_policy_kinds().size()
                                       ? rclcpp::detail::declare_qos_parameters(
                                             options.qos_overriding_options, node_parameters,

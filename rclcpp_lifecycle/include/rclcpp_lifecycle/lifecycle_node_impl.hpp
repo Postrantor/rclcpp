@@ -166,8 +166,7 @@ typename rclcpp::GenericTimer<CallbackT>::SharedPtr LifecycleNode::create_timer(
  * @param service_name 服务名称 (Service name)
  * @param qos_profile QoS 配置文件 (QoS profile)
  * @param group 回调组 (Callback group)
- * @return typename rclcpp::Client<ServiceT>::SharedPtr 返回创建的服务客户端智能指针 (Return the
- * created service client shared pointer)
+ * @return typename rclcpp::Client<ServiceT>::SharedPtr 返回创建的服务客户端智能指针
  */
 template <typename ServiceT>
 typename rclcpp::Client<ServiceT>::SharedPtr LifecycleNode::create_client(
@@ -175,7 +174,6 @@ typename rclcpp::Client<ServiceT>::SharedPtr LifecycleNode::create_client(
     const rmw_qos_profile_t& qos_profile,
     rclcpp::CallbackGroup::SharedPtr group) {
   // 调用 rclcpp 创建服务客户端，并返回该客户端的智能指针
-  // Call rclcpp to create a service client and return its smart pointer
   return rclcpp::create_client<ServiceT>(
       node_base_, node_graph_, node_services_, service_name, qos_profile, group);
 }
@@ -187,8 +185,7 @@ typename rclcpp::Client<ServiceT>::SharedPtr LifecycleNode::create_client(
  * @param service_name 服务名称 (Service name)
  * @param qos QoS 配置 (QoS configuration)
  * @param group 回调组 (Callback group)
- * @return typename rclcpp::Client<ServiceT>::SharedPtr 返回创建的服务客户端智能指针 (Return the
- * created service client shared pointer)
+ * @return typename rclcpp::Client<ServiceT>::SharedPtr 返回创建的服务客户端智能指针
  */
 template <typename ServiceT>
 typename rclcpp::Client<ServiceT>::SharedPtr LifecycleNode::create_client(
@@ -210,8 +207,7 @@ typename rclcpp::Client<ServiceT>::SharedPtr LifecycleNode::create_client(
  * @param[in] callback 服务回调函数 (Service callback function)
  * @param[in] qos_profile QoS配置文件 (QoS profile)
  * @param[in] group 回调组 (Callback group)
- * @return rclcpp::Service<ServiceT>::SharedPtr 创建的服务共享指针 (Shared pointer of the created
- * service)
+ * @return rclcpp::Service<ServiceT>::SharedPtr 创建的服务共享指针
  */
 template <typename ServiceT, typename CallbackT>
 typename rclcpp::Service<ServiceT>::SharedPtr LifecycleNode::create_service(
@@ -219,8 +215,7 @@ typename rclcpp::Service<ServiceT>::SharedPtr LifecycleNode::create_service(
     CallbackT&& callback,
     const rmw_qos_profile_t& qos_profile,
     rclcpp::CallbackGroup::SharedPtr group) {
-  // 调用rclcpp::create_service创建服务并返回 (Call rclcpp::create_service to create a service and
-  // return it)
+  // 调用rclcpp::create_service创建服务并返回
   return rclcpp::create_service<ServiceT, CallbackT>(
       node_base_, node_services_, service_name, std::forward<CallbackT>(callback), qos_profile,
       group);
@@ -235,8 +230,7 @@ typename rclcpp::Service<ServiceT>::SharedPtr LifecycleNode::create_service(
  * @param[in] callback 服务回调函数 (Service callback function)
  * @param[in] qos QoS设置 (QoS settings)
  * @param[in] group 回调组 (Callback group)
- * @return rclcpp::Service<ServiceT>::SharedPtr 创建的服务共享指针 (Shared pointer of the created
- * service)
+ * @return rclcpp::Service<ServiceT>::SharedPtr 创建的服务共享指针
  */
 template <typename ServiceT, typename CallbackT>
 typename rclcpp::Service<ServiceT>::SharedPtr LifecycleNode::create_service(
@@ -244,8 +238,7 @@ typename rclcpp::Service<ServiceT>::SharedPtr LifecycleNode::create_service(
     CallbackT&& callback,
     const rclcpp::QoS& qos,
     rclcpp::CallbackGroup::SharedPtr group) {
-  // 调用rclcpp::create_service创建服务并返回 (Call rclcpp::create_service to create a service and
-  // return it)
+  // 调用rclcpp::create_service创建服务并返回
   return rclcpp::create_service<ServiceT, CallbackT>(
       node_base_, node_services_, service_name, std::forward<CallbackT>(callback), qos, group);
 }
@@ -258,8 +251,7 @@ typename rclcpp::Service<ServiceT>::SharedPtr LifecycleNode::create_service(
  * @param[in] topic_type 主题类型 (Topic type)
  * @param[in] qos QoS设置 (QoS settings)
  * @param[in] options 发布器选项 (Publisher options)
- * @return std::shared_ptr<rclcpp::GenericPublisher> 创建的通用发布器共享指针 (Shared pointer of the
- * created generic publisher)
+ * @return std::shared_ptr<rclcpp::GenericPublisher> 创建的通用发布器共享指针
  */
 template <typename AllocatorT>
 std::shared_ptr<rclcpp::GenericPublisher> LifecycleNode::create_generic_publisher(
@@ -267,13 +259,11 @@ std::shared_ptr<rclcpp::GenericPublisher> LifecycleNode::create_generic_publishe
     const std::string& topic_type,
     const rclcpp::QoS& qos,
     const rclcpp::PublisherOptionsWithAllocator<AllocatorT>& options) {
-  // 调用rclcpp::create_generic_publisher创建通用发布器并返回 (Call rclcpp::create_generic_publisher
-  // to create a generic publisher and return it)
+  // 调用rclcpp::create_generic_publisher创建通用发布器并返回
   return rclcpp::create_generic_publisher(
       node_topics_,
-      // TODO(karsten1987): LifecycleNode目前不支持子命名空间 (LifecycleNode is currently not
-      // supporting subnamespaces) 参见 https://github.com/ros2/rclcpp/issues/1614 (see
-      // https://github.com/ros2/rclcpp/issues/1614)
+      // TODO(karsten1987): LifecycleNode目前不支持子命名空间
+      // 参见 https://github.com/ros2/rclcpp/issues/1614
       topic_name, topic_type, qos, options);
 }
 
@@ -286,8 +276,7 @@ std::shared_ptr<rclcpp::GenericPublisher> LifecycleNode::create_generic_publishe
  * @param[in] qos QoS设置 (QoS settings)
  * @param[in] callback 订阅回调函数 (Subscription callback function)
  * @param[in] options 订阅选项 (Subscription options)
- * @return std::shared_ptr<rclcpp::GenericSubscription> 创建的通用订阅器共享指针 (Shared pointer of
- * the created generic subscription)
+ * @return std::shared_ptr<rclcpp::GenericSubscription> 创建的通用订阅器共享指针
  */
 template <typename AllocatorT>
 std::shared_ptr<rclcpp::GenericSubscription> LifecycleNode::create_generic_subscription(
@@ -300,9 +289,8 @@ std::shared_ptr<rclcpp::GenericSubscription> LifecycleNode::create_generic_subsc
   // rclcpp::create_generic_subscription to create a generic subscription and return it)
   return rclcpp::create_generic_subscription(
       node_topics_,
-      // TODO(karsten1987): LifecycleNode目前不支持子命名空间 (LifecycleNode is currently not
-      // supporting subnamespaces) 参见 https://github.com/ros2/rclcpp/issues/1614 (see
-      // https://github.com/ros2/rclcpp/issues/1614)
+      // TODO(karsten1987): LifecycleNode目前不支持子命名空间
+      // 参见 https://github.com/ros2/rclcpp/issues/1614
       topic_name, topic_type, qos, std::move(callback), options);
 }
 

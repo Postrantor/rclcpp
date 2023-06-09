@@ -23,36 +23,40 @@
 namespace rclcpp_lifecycle {
 namespace node_interfaces {
 /// 生命周期节点接口类 (Interface class for a managed node).
-/** 虚拟函数定义如下 (Virtual functions as defined in)
+/** 虚拟函数定义如下
  * http://design.ros2.org/articles/node_lifecycle.html
  *
- * 如果回调函数执行成功 (If the callback function returns successfully),
- * 则完成指定的转换 (the specified transition is completed).
- * 如果回调函数失败或抛出未捕获的异常 (If the callback function fails or throws an),
- * 则调用on_error函数 (uncaught exception, the on_error function is called).
- * 默认情况下，所有函数都可以选择覆写 (By default, all functions remain optional to overwrite)
- * 并返回true。除了on_error函数，该函数 (and return true. Except the on_error function, which)
- * 返回false，从而进入关闭/最终状态 (returns false and thus goes to shutdown/finalize state).
+ * 如果回调函数执行成功 
+ * 则完成指定的转换 
+ * 如果回调函数失败或抛出未捕获的异常 
+ * 则调用on_error函数 
+ * 默认情况下，所有函数都可以选择覆写 
+ * 并返回true。除了on_error函数，该函数 
+ * 返回false，从而进入关闭/最终状态 
+ * 
+ * (If the callback function returns successfully),
+ * (the specified transition is completed).
+ * (If the callback function fails or throws an),
+ * (uncaught exception, the on_error function is called).
+ * (By default, all functions remain optional to overwrite)
+ * (and return true. Except the on_error function, which)
+ * (returns false and thus goes to shutdown/finalize state).
  */
 class LifecycleNodeInterface {
 protected:
-  // RCLCPP_LIFECYCLE_PUBLIC宏用于声明符号可见性 (RCLCPP_LIFECYCLE_PUBLIC macro is used for
-  // declaring symbol visibility)
+  // RCLCPP_LIFECYCLE_PUBLIC宏用于声明符号可见性
   RCLCPP_LIFECYCLE_PUBLIC
-  // 生命周期节点接口构造函数 (LifecycleNodeInterface constructor)
+  // 生命周期节点接口构造函数
   LifecycleNodeInterface() {}
 
 public:
   // 定义回调返回值的枚举类 (Define an enumeration class for callback return values)
   enum class CallbackReturn : uint8_t {
-    // 成功状态，对应于 TRANSITION_CALLBACK_SUCCESS (Success state, corresponds to
-    // TRANSITION_CALLBACK_SUCCESS)
+    // 成功状态，对应于 TRANSITION_CALLBACK_SUCCESS
     SUCCESS = lifecycle_msgs::msg::Transition::TRANSITION_CALLBACK_SUCCESS,
-    // 失败状态，对应于 TRANSITION_CALLBACK_FAILURE (Failure state, corresponds to
-    // TRANSITION_CALLBACK_FAILURE)
+    // 失败状态，对应于 TRANSITION_CALLBACK_FAILURE
     FAILURE = lifecycle_msgs::msg::Transition::TRANSITION_CALLBACK_FAILURE,
-    // 错误状态，对应于 TRANSITION_CALLBACK_ERROR (Error state, corresponds to
-    // TRANSITION_CALLBACK_ERROR)
+    // 错误状态，对应于 TRANSITION_CALLBACK_ERROR
     ERROR = lifecycle_msgs::msg::Transition::TRANSITION_CALLBACK_ERROR
   };
 

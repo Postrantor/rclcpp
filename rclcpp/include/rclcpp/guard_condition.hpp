@@ -140,19 +140,6 @@ public:
    *
    * \param[in] callback 守卫条件被触发时要调用的函数对象
    */
-  /// The callback receives a size_t which is the number of times the guard condition was triggered
-  /// since the last time this callback was called.
-  /// Normally this is 1, but can be > 1 if the guard condition was triggered before any
-  /// callback was set.
-  ///
-  /// Calling it again will clear any previously set callback.
-  ///
-  /// This function is thread-safe.
-  ///
-  /// If you want more information available in the callback, like the guard condition
-  /// or other information, you may use a lambda with captures or std::bind.
-  ///
-  /// \param[in] callback functor to be called when the guard condition is triggered
   RCLCPP_PUBLIC
   void set_on_trigger_callback(std::function<void(size_t)> callback);
 

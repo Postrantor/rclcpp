@@ -222,7 +222,7 @@ void LifecycleNode::LifecycleNodeInterfaceImpl::init(bool enable_communication_i
  * \brief 注册回调函数
  * \param lifecycle_transition 生命周期转换的 ID
  * \param cb 回调函数，接收 State 类型参数并返回 CallbackReturn 类型结果
- * \return 返回注册成功状态（始终为 true）
+ * \return 返回注册成功状态(始终为 true)
  *
  * Register a callback function
  * \param lifecycle_transition The ID of the lifecycle transition
@@ -705,73 +705,73 @@ const State &LifecycleNode::LifecycleNodeInterfaceImpl::trigger_transition(
 }
 
 /**
- * @brief 触发生命周期节点的状态转换（Trigger a transition in the lifecycle node's state）
- * @param transition_id 转换的ID（The ID of the transition to trigger）
- * @return 返回当前状态（Return the current state）
+ * @brief 触发生命周期节点的状态转换(Trigger a transition in the lifecycle node's state)
+ * @param transition_id 转换的ID(The ID of the transition to trigger)
+ * @return 返回当前状态(Return the current state)
  */
 const State &LifecycleNode::LifecycleNodeInterfaceImpl::trigger_transition(uint8_t transition_id) {
-  // 定义错误变量（Define error variable）
+  // 定义错误变量(Define error variable)
   node_interfaces::LifecycleNodeInterface::CallbackReturn error;
 
-  // 改变状态（Change state）
+  // 改变状态(Change state)
   change_state(transition_id, error);
 
-  // 忽略错误变量（Ignore error variable）
+  // 忽略错误变量(Ignore error variable)
   (void)error;
 
-  // 返回当前状态（Return the current state）
+  // 返回当前状态(Return the current state)
   return get_current_state();
 }
 
 /**
- * @brief 触发生命周期节点的状态转换，并返回回调代码（Trigger a transition in the lifecycle node's
- * state and return callback code）
- * @param transition_id 转换的ID（The ID of the transition to trigger）
- * @param cb_return_code 回调返回代码（Callback return code）
- * @return 返回当前状态（Return the current state）
+ * @brief 触发生命周期节点的状态转换，并返回回调代码(Trigger a transition in the lifecycle node's
+ * state and return callback code)
+ * @param transition_id 转换的ID(The ID of the transition to trigger)
+ * @param cb_return_code 回调返回代码(Callback return code)
+ * @return 返回当前状态(Return the current state)
  */
 const State &LifecycleNode::LifecycleNodeInterfaceImpl::trigger_transition(
     uint8_t transition_id,
     node_interfaces::LifecycleNodeInterface::CallbackReturn &cb_return_code) {
-  // 改变状态（Change state）
+  // 改变状态(Change state)
   change_state(transition_id, cb_return_code);
 
-  // 返回当前状态（Return the current state）
+  // 返回当前状态(Return the current state)
   return get_current_state();
 }
 
 /**
- * @brief 添加管理实体（Add managed entity）
- * @param managed_entity 管理实体的弱指针（Weak pointer to the managed entity）
+ * @brief 添加管理实体(Add managed entity)
+ * @param managed_entity 管理实体的弱指针(Weak pointer to the managed entity)
  */
 void LifecycleNode::LifecycleNodeInterfaceImpl::add_managed_entity(
     std::weak_ptr<rclcpp_lifecycle::ManagedEntityInterface> managed_entity) {
-  // 将管理实体添加到列表中（Add the managed entity to the list）
+  // 将管理实体添加到列表中(Add the managed entity to the list)
   weak_managed_entities_.push_back(managed_entity);
 }
 
 /**
- * @brief 添加定时器句柄（Add timer handle）
- * @param timer 定时器的共享指针（Shared pointer to the timer）
+ * @brief 添加定时器句柄(Add timer handle)
+ * @param timer 定时器的共享指针(Shared pointer to the timer)
  */
 void LifecycleNode::LifecycleNodeInterfaceImpl::add_timer_handle(
     std::shared_ptr<rclcpp::TimerBase> timer) {
-  // 将定时器添加到列表中（Add the timer to the list）
+  // 将定时器添加到列表中(Add the timer to the list)
   weak_timers_.push_back(timer);
 }
 
 /**
- * @brief 激活生命周期节点（Activate lifecycle node）
+ * @brief 激活生命周期节点(Activate lifecycle node)
  */
 void LifecycleNode::LifecycleNodeInterfaceImpl::on_activate() const {
-  // 遍历所有弱管理实体（Iterate through all weak managed entities）
+  // 遍历所有弱管理实体(Iterate through all weak managed entities)
   for (const auto &weak_entity : weak_managed_entities_) {
-    // 获取强实体指针（Get strong entity pointer）
+    // 获取强实体指针(Get strong entity pointer)
     auto entity = weak_entity.lock();
 
-    // 如果实体存在（If the entity exists）
+    // 如果实体存在(If the entity exists)
     if (entity) {
-      // 激活实体（Activate the entity）
+      // 激活实体(Activate the entity)
       entity->on_activate();
     }
   }

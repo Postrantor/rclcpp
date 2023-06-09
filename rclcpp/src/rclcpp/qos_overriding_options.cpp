@@ -79,7 +79,7 @@ QosOverridingOptions QosOverridingOptions::with_default_policies(
 // 获取 QosOverridingOptions 的 ID (Get the ID of QosOverridingOptions)
 const std::string& QosOverridingOptions::get_id() const { return id_; }
 
-// 获取 QosOverridingOptions 的策略种类列表 (Get the policy kinds list of QosOverridingOptions)
+// 获取 QosOverridingOptions 的策略种类列表
 const std::vector<QosPolicyKind>& QosOverridingOptions::get_policy_kinds() const {
   return policy_kinds_;
 }

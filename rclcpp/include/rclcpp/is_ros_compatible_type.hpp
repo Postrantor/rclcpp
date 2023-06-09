@@ -29,12 +29,9 @@ namespace rclcpp {
 template <typename T>
 struct is_ros_compatible_type {
   /**
-   * @brief 标志变量，表示类型 T 是否与 ROS2 兼容 (Flag indicating whether the type T is compatible
-   * with ROS2)
+   * @brief 标志变量，表示类型 T 是否与 ROS2 兼容
    *
    * 如果 T 是 ROS 消息类型或者 T 的 TypeAdapter 特化，则 value 为 true，否则为 false。
-   * (If T is a ROS message type or has a specialized TypeAdapter, the value is true; otherwise, it
-   * is false.)
    */
   static constexpr bool value = rosidl_generator_traits::is_message<T>::value ||
                                 rclcpp::TypeAdapter<T>::is_specialized::value;

@@ -82,19 +82,13 @@ std::shared_ptr<PublisherT> create_publisher(
 }  // namespace detail
 
 /// 创建并返回给定 MessageT 类型的发布者。
-/// Create and return a publisher of the given MessageT type.
 /**
  * NodeT 类型只需要具有一个名为 get_node_topics_interface() 的方法，
  * 该方法返回一个指向 NodeTopicsInterface 的 shared_ptr。
- * The NodeT type only needs to have a method called get_node_topics_interface(),
- * which returns a shared_ptr to a NodeTopicsInterface.
  *
  * 如果 `options.qos_overriding_options` 启用了 qos 参数覆盖，
  * 那么 NodeT 还必须具有一个名为 get_node_parameters_interface() 的方法，
  * 该方法返回一个指向 NodeParametersInterface 的 shared_ptr。
- * In case `options.qos_overriding_options` is enabling qos parameter overrides,
- * NodeT must also have a method called get_node_parameters_interface(),
- * which returns a shared_ptr to a NodeParametersInterface.
  */
 template <
     typename MessageT,

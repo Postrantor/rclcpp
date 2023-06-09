@@ -34,30 +34,21 @@ namespace rclcpp {
 namespace node_interfaces {
 
 /// 纯虚接口类，用于实现 Node API 的 NodeTopics 部分。
-/// Pure virtual interface class for the NodeTopics part of the Node API.
 class NodeTopicsInterface {
 public:
   // 智能指针别名定义
-  // Smart pointer aliases definition
   RCLCPP_SMART_PTR_ALIASES_ONLY(NodeTopicsInterface)
 
   /// 默认析构函数
-  /// Default destructor
   RCLCPP_PUBLIC
   virtual ~NodeTopicsInterface() = default;
 
   /// 创建发布者
-  /// Create a publisher
   /**
    * \param[in] topic_name 要发布的主题名称
    * \param[in] publisher_factory 发布者工厂对象
    * \param[in] qos 指定服务质量（Quality of Service）配置
    * \return 返回创建的发布者共享指针
-   *
-   * \param[in] topic_name Topic name to be published
-   * \param[in] publisher_factory Publisher factory object
-   * \param[in] qos Quality of Service configuration
-   * \return Returns the created publisher shared pointer
    */
   RCLCPP_PUBLIC
   virtual rclcpp::PublisherBase::SharedPtr create_publisher(
@@ -66,13 +57,9 @@ public:
       const rclcpp::QoS& qos) = 0;
 
   /// 添加发布者
-  /// Add a publisher
   /**
    * \param[in] publisher 要添加的发布者共享指针
    * \param[in] callback_group 回调组共享指针
-   *
-   * \param[in] publisher Shared pointer of the publisher to be added
-   * \param[in] callback_group Shared pointer of the callback group
    */
   RCLCPP_PUBLIC
   virtual void add_publisher(
@@ -80,17 +67,11 @@ public:
       rclcpp::CallbackGroup::SharedPtr callback_group) = 0;
 
   /// 创建订阅者
-  /// Create a subscription
   /**
    * \param[in] topic_name 要订阅的主题名称
    * \param[in] subscription_factory 订阅者工厂对象
    * \param[in] qos 指定服务质量（Quality of Service）配置
    * \return 返回创建的订阅者共享指针
-   *
-   * \param[in] topic_name Topic name to be subscribed
-   * \param[in] subscription_factory Subscription factory object
-   * \param[in] qos Quality of Service configuration
-   * \return Returns the created subscription shared pointer
    */
   RCLCPP_PUBLIC
   virtual rclcpp::SubscriptionBase::SharedPtr create_subscription(
@@ -99,13 +80,9 @@ public:
       const rclcpp::QoS& qos) = 0;
 
   /// 添加订阅者
-  /// Add a subscription
   /**
    * \param[in] subscription 要添加的订阅者共享指针
    * \param[in] callback_group 回调组共享指针
-   *
-   * \param[in] subscription Shared pointer of the subscription to be added
-   * \param[in] callback_group Shared pointer of the callback group
    */
   RCLCPP_PUBLIC
   virtual void add_subscription(
@@ -113,35 +90,24 @@ public:
       rclcpp::CallbackGroup::SharedPtr callback_group) = 0;
 
   /// 获取节点基础接口指针
-  /// Get the node base interface pointer
   /**
    * \return 返回节点基础接口指针
-   *
-   * \return Returns the node base interface pointer
    */
   RCLCPP_PUBLIC
   virtual rclcpp::node_interfaces::NodeBaseInterface* get_node_base_interface() const = 0;
 
   /// 获取节点定时器接口指针
-  /// Get the node timers interface pointer
   /**
    * \return 返回节点定时器接口指针
-   *
-   * \return Returns the node timers interface pointer
    */
   RCLCPP_PUBLIC
   virtual rclcpp::node_interfaces::NodeTimersInterface* get_node_timers_interface() const = 0;
 
   /// 根据输入名称获取重映射和扩展的主题名称
-  /// Get a remapped and expanded topic name given an input name
   /**
    * \param[in] name 输入的主题名称
    * \param[in] only_expand 是否仅进行扩展，默认为 false
    * \return 返回解析后的主题名称
-   *
-   * \param[in] name Input topic name
-   * \param[in] only_expand Whether to only expand, default is false
-   * \return Returns the resolved topic name
    */
   RCLCPP_PUBLIC
   virtual std::string resolve_topic_name(

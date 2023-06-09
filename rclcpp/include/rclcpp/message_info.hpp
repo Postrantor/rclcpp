@@ -21,17 +21,15 @@
 namespace rclcpp {
 
 /// \class MessageInfo
-/// \brief 附加的订阅消息的元数据信息。 (Additional meta data about messages taken from
-/// subscriptions.)
+/// \brief 附加的订阅消息的元数据信息。
 class RCLCPP_PUBLIC MessageInfo {
 public:
-  /// 默认空构造函数。 (Default empty constructor.)
+  /// 默认空构造函数。
   MessageInfo() = default;
 
-  /// 转换构造函数，故意不标记为 explicit。 (Conversion constructor, which is intentionally not
-  /// marked as explicit.)
+  /// 转换构造函数，故意不标记为 explicit。
   /**
-   * \param[in] rmw_message_info 用于初始化类的消息信息 (message info to initialize the class)
+   * \param[in] rmw_message_info 用于初始化类的消息信息
    */
   // cppcheck-suppress noExplicitConstructor
   MessageInfo(const rmw_message_info_t& rmw_message_info);  // NOLINT(runtime/explicit)
@@ -39,16 +37,14 @@ public:
   /// 虚析构函数。 (Virtual destructor.)
   virtual ~MessageInfo();
 
-  /// 以底层 rmw 消息信息类型返回消息信息。 (Return the message info as the underlying rmw message
-  /// info type.)
+  /// 以底层 rmw 消息信息类型返回消息信息。
   const rmw_message_info_t& get_rmw_message_info() const;
 
-  /// 以底层 rmw 消息信息类型返回消息信息。 (Return the message info as the underlying rmw message
-  /// info type.)
+  /// 以底层 rmw 消息信息类型返回消息信息。
   rmw_message_info_t& get_rmw_message_info();
 
 private:
-  /// rmw 消息信息变量。 (rmw message info variable.)
+  /// rmw 消息信息变量。
   rmw_message_info_t rmw_message_info_;
 };
 

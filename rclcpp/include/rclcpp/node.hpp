@@ -210,11 +210,8 @@ public:
    * any of the above cases.
    *
    * \param[in] topic_name 此发布者要发布的主题。
-   * \param[in] topic_name The topic for this publisher to publish on.
    * \param[in] qos 发布者的服务质量设置。
-   * \param[in] qos The Quality of Service settings for the publisher.
    * \param[in] options 创建的 Publisher 的其他选项。
-   * \param[in] options Additional options for the created Publisher.
    * \return 创建的发布者的共享指针。
    * \return Shared pointer to the created publisher.
    */

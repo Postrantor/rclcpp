@@ -159,19 +159,14 @@ public:
   bool assert_liveliness() const;
 
   /// 获取实际 QoS 设置，在确定默认值后。
-  /// Get the actual QoS settings, after the defaults have been determined.
   /**
    * 使用 RMW_QOS_POLICY_*_SYSTEM_DEFAULT 时应用的实际配置，
    * 只有在创建发布器之后才能解析，并且它取决于底层的 rmw 实现。
-   * The actual configuration applied when using RMW_QOS_POLICY_*_SYSTEM_DEFAULT
-   * can only be resolved after the creation of the publisher, and it
-   * depends on the underlying rmw implementation.
+
    * 如果无法用 ROS 术语表示正在使用的底层设置，
    * 它将设置为 RMW_QOS_POLICY_*_UNKNOWN。
-   * If the underlying setting in use can't be represented in ROS terms,
-   * it will be set to RMW_QOS_POLICY_*_UNKNOWN.
+
    * 当发生意外错误时可能会抛出运行时错误。
-   * May throw runtime_error when an unexpected error occurs.
    *
    * \return 实际 qos 设置。
    * \return The actual qos settings.

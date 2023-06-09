@@ -20,19 +20,14 @@ namespace rclcpp
 
 /// @brief 用作 create_publisher 和 create_subscriber 的参数
 ///        when intra-process communication is enabled
-/// @brief Used as argument in create_publisher and create_subscriber
-///        when intra-process communication is enabled
 enum class IntraProcessBufferType {
   /// 设置内部进程缓冲区中使用的数据类型为 std::shared_ptr<MessageT>
-  /// Set the data type used in the intra-process buffer as std::shared_ptr<MessageT>
   SharedPtr,
 
   /// 设置内部进程缓冲区中使用的数据类型为 std::unique_ptr<MessageT>
-  /// Set the data type used in the intra-process buffer as std::unique_ptr<MessageT>
   UniquePtr,
 
   /// 设置内部进程缓冲区中使用的数据类型与回调函数中使用的相同
-  /// Set the data type used in the intra-process buffer as the same used in the callback
   CallbackDefault
 };
 
