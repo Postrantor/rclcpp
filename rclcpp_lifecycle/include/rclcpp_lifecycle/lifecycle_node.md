@@ -4,39 +4,42 @@
 all code
 ```
 
-这个文件中定义了 rclcpp_lifecycle 包中的 LifecycleNode 类。LifecycleNode 继承自 rclcpp::Node ,并实现了 node_interfaces::LifecycleNodeInterface 接口,可以作为 ROS 2 生命周期管理的基本单元。
+这个文件中定义了 rclcpp_lifecycle 包中的 LifecycleNode 类。LifecycleNode 继承自 `rclcpp::Node` ,并实现了 `node_interfaces::LifecycleNodeInterface` 接口,可以作为 ROS 2 生命周期管理的基本单元。
 
 LifecycleNode 类包含:
 
-- rclcpp::Node 的全部接口,如创建发布者、订阅者、服务等
-- node_interfaces::LifecycleNodeInterface 接口,包含生命周期状态变更相关接口
+- `rclcpp::Node` 的全部接口,如创建发布者、订阅者、服务等
+- `node_interfaces::LifecycleNodeInterface` 接口,包含生命周期状态变更相关接口
 - 一些辅助方法,如添加托管实体(managed entity)和定时器句柄(timer handle)等
+
+> [!NOTE]
+> 这里@jiaqi.li 订正，并没有继承 `rclcpp::Node`
 
 LifecycleNode 的主要功能有:
 
-- 生命周期状态管理:可以获取当前状态、可用状态及状态转变;可以触发状态转变
-- 调用回调:在生命周期状态转变时可以调用已注册的回调函数
-- 托管实体及定时器管理:LifecycleNode 可以添加并管理其他实体和定时器的生命周期
+- **生命周期状态管理**: 可以获取当前状态、可用状态及状态转变;可以触发状态转变
+- **调用回调**: 在生命周期状态转变时可以调用已注册的**回调函数**
+- **托管实体及定时器管理**: LifecycleNode 可以添加并管理其他实体和定时器的生命周期
 
 此文件中定义的相关类和接口有:
 
-- LifecycleNode: 生命周期节点类,主要功能实现类
-- LifecyclePublisher: 生命周期发布者,由 LifecycleNode 创建,生命周期受 LifecycleNode 管理
-- Transition: 表示生命周期的状态转变
-- State: 表示生命周期的状态
-- ManagedEntityInterface: LifecycleNode 可管理的实体接口
-- \*\_CallbackHandle: 生命周期状态变更回调句柄
-- \*\_CallbackType: 生命周期状态变更回调函数类型
+- `LifecycleNode`: 生命周期节点类,主要功能实现类
+- `LifecyclePublisher`: 生命周期发布者,由 LifecycleNode 创建,生命周期受 LifecycleNode 管理
+- `Transition`: 表示生命周期的状态转变
+- `State`: 表示生命周期的状态
+- `ManagedEntityInterface`: LifecycleNode 可管理的实体接口
+- `_CallbackHandle`: 生命周期状态变更回调句柄
+- `_CallbackType`: 生命周期状态变更回调函数类型
 
 LifecycleNode 类的主要组成部分有:
 
-- node\*\**: rclcpp::Node 相关接口的实现,如 node*base*、node*graph\*等
-- impl\_: LifecycleNodeInterfaceImpl 的实现,包含生命周期状态变更相关逻辑
+- `node_`: `rclcpp::Node` 相关接口的实现,如 `node_base_`、`node_graph_`等
+- `impl_`: LifecycleNodeInterfaceImpl 的实现,包含生命周期状态变更相关逻辑
 - 各种回调函数注册和移除的方法,如 add_on_activate_callback 等
 - 生命周期状态变更的触发方法,如 configure、activate、deactivate 等
 - 对 ManagedEntityInterface 和 TimerBase 的管理,如 add_managed_entity 和 add_timer_handle
 
-综上,LifecycleNode 在 rclcpp::Node 的基础上,实现了生命周期节点所需的全部功能,可以很好地用于 ROS 2 应用的生命周期管理。
+综上,LifecycleNode 在 `rclcpp::Node` 的基础上,实现了生命周期节点所需的全部功能,可以很好地用于 ROS 2 应用的生命周期管理。
 
 ---
 
@@ -76,7 +79,7 @@ LifecycleNode 允许添加托管实体(ManagedEntity)和定时器(TimerBase),并
 
 其他接口包括:
 
-- rclcpp::Node 的全部功能接口,LifecycleNode 继承自 rclcpp::Node
+- `rclcpp::Node` 的全部功能接口,LifecycleNode 继承自 `rclcpp::Node`
 - `register_on_configure()`等 : 注册生命周期回调接口
 - `get_node_options()` : 获取节点选项
 - 析构函数 : 确保正确清理资源
@@ -90,7 +93,7 @@ LifecycleNode 通过继承和组合,实现了生命周期节点所有的必要�
 LifecycleNode 相关的头文件主要有:
 
 - `rclcpp/lifecycle_node.hpp`: LifecycleNode 类定义,是本文分析的主要对象
-- `rclcpp/node.hpp`: rclcpp::Node 类定义,LifecycleNode 继承自该类
+- `rclcpp/node.hpp`: `rclcpp::Node` 类定义,LifecycleNode 继承自该类
 - `rclcpp/node_options.hpp`: 节点选项类定义,LifecycleNode 构造函数使用
 - `rclcpp/lifecycle_publisher.hpp`: 生命周期发布者类定义,由 LifecycleNode 管理
 - `rclcpp/timer.hpp`: 定时器类定义,LifecycleNode 使用该类的子类 TimerBase
@@ -101,7 +104,7 @@ LifecycleNode 相关的头文件主要有:
 
 综合分析这些头文件,我们可以得出:
 
-- LifecycleNode 继承自 rclcpp::Node,实现 LifecycleNodeInterface 接口,是 ROS 2 生命周期节点的抽象和实现
+- LifecycleNode 继承自 `rclcpp::Node`,实现 LifecycleNodeInterface 接口,是 ROS 2 生命周期节点的抽象和实现
 - LifecycleNode 使用 NodeOptions 类指定节点选项,使用 TimerBase 和 ManagedEntity 等基类管理定时器和托管实体
 - LifecyclePublisher 是 LifecycleNode 管理的典型托管实体
 - LifecycleNode 使用 OpenSplice 的生命周期定义,但提供更高级的 C++ API
@@ -2107,15 +2110,15 @@ LifecycleNode 类继承 LifecycleNodeInterface 接口,并实现其中的大多�
 
 ---
 
-这段代码定义了 rclcpp_lifecycle 中的 LifecycleNode 类,LifecycleNode 继承自 rclcpp::Node 和 rclcpp_lifecycle::LifecycleNodeInterface。
+这段代码定义了 rclcpp_lifecycle 中的 LifecycleNode 类,LifecycleNode 继承自 `rclcpp::Node` 和 rclcpp_lifecycle::LifecycleNodeInterface。
 
-LifecycleNode 实现了 ROS 生命周期管理,并集成了 rclcpp::Node 的功能,如创建发布者、订阅者、客户端、服务等。
+LifecycleNode 实现了 ROS 生命周期管理,并集成了 `rclcpp::Node` 的功能,如创建发布者、订阅者、客户端、服务等。
 
 主要组成:
 
 - 构造函数:接收节点名称、命名空间和选项作为输入,初始化成员变量
 - 成员变量:
-  - node*base*:NodeBaseInterface 的共享指针,提供节点的基本接口
+  - `node_base_`:NodeBaseInterface 的共享指针,提供节点的基本接口
   - node*graph*:NodeGraphInterface 的共享指针,提供节点图接口
   - node*logging*:NodeLoggingInterface 的共享指针,提供日志记录接口
   - node*timers*:NodeTimersInterface 的共享指针,提供定时器接口
@@ -2149,20 +2152,20 @@ LifecycleNode 实现了 ROS 生命周期管理,并集成了 rclcpp::Node 的功�
 
 ```mermaid
 classDiagram
-  LifecycleNode <|-- rclcpp::Node
+  LifecycleNode <|-- `rclcpp::Node`
   LifecycleNode <|.. rclcpp_lifecycle::LifecycleNodeInterface
 
-  LifecycleNode : -node_base_ : rclcpp::node_interfaces::NodeBaseInterface::SharedPtr
-  LifecycleNode : -node_graph_ : rclcpp::node_interfaces::NodeGraphInterface::SharedPtr
-  LifecycleNode : -node_logging_ : rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr
-  LifecycleNode : -node_timers_ : rclcpp::node_interfaces::NodeTimersInterface::SharedPtr
-  LifecycleNode : -node_topics_ : rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr
-  LifecycleNode : -node_services : rclcpp::node_interfaces::NodeServicesInterface::SharedPtr
-  LifecycleNode : -node_clock_ : rclcpp::node_interfaces::NodeClockInterface::SharedPtr
-  LifecycleNode : -node_parameters_ : rclcpp::node_interfaces::NodeParametersInterface::SharedPtr
-  LifecycleNode : -node_time_source_ : rclcpp::node_interfaces::NodeTimeSourceInterface::SharedPtr
-  LifecycleNode : -node_waitables_ : rclcpp::node_interfaces::NodeWaitablesInterface::SharedPtr
-  LifecycleNode : -node_options_ : const rclcpp::NodeOptions
+  LifecycleNode : -node_base_ : `rclcpp::node`_interfaces::NodeBaseInterface::SharedPtr
+  LifecycleNode : -node_graph_ : `rclcpp::node`_interfaces::NodeGraphInterface::SharedPtr
+  LifecycleNode : -node_logging_ : `rclcpp::node`_interfaces::NodeLoggingInterface::SharedPtr
+  LifecycleNode : -node_timers_ : `rclcpp::node`_interfaces::NodeTimersInterface::SharedPtr
+  LifecycleNode : -node_topics_ : `rclcpp::node`_interfaces::NodeTopicsInterface::SharedPtr
+  LifecycleNode : -node_services : `rclcpp::node`_interfaces::NodeServicesInterface::SharedPtr
+  LifecycleNode : -node_clock_ : `rclcpp::node`_interfaces::NodeClockInterface::SharedPtr
+  LifecycleNode : -node_parameters_ : `rclcpp::node`_interfaces::NodeParametersInterface::SharedPtr
+  LifecycleNode : -node_time_source_ : `rclcpp::node`_interfaces::NodeTimeSourceInterface::SharedPtr
+  LifecycleNode : -node_waitables_ : `rclcpp::node`_interfaces::NodeWaitablesInterface::SharedPtr
+  LifecycleNode : -node_options_ : const `rclcpp::Node`Options
   LifecycleNode : -impl_ : std::unique_ptr<LifecycleNodeInterfaceImpl>
 
   LifecycleNode : +get_node_names() : std::vector<std::string>

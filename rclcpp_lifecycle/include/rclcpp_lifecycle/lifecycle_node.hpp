@@ -155,7 +155,6 @@ class LifecycleNode : public node_interfaces::LifecycleNodeInterface,
                       public std::enable_shared_from_this<LifecycleNode> {
 public:
   /// 定义智能指针类型别名，方便在其他地方使用。
-  /// (Define smart pointer type aliases for easier use in other places.)
   RCLCPP_SMART_PTR_DEFINITIONS(LifecycleNode)
 
   /// 创建一个具有指定名称的新生命周期节点。
@@ -266,6 +265,7 @@ public:
    * \param[in] options 此订阅的订阅选项。
    * \param[in] msg_mem_strat 用于分配消息的消息内存策略。
    * \return 创建的订阅的共享指针。
+   *
    * \param[in] topic_name The topic to subscribe on.
    * \param[in] callback The user-defined callback function.
    * \param[in] qos The quality of service for this subscription.
@@ -292,10 +292,11 @@ public:
   /// Create a timer that uses the wall clock to drive the callback.
   /**
    * \param[in] period 回调触发之间的时间间隔。
-   * \param[in] period Time interval between triggers of the callback.
    * \param[in] callback 用户定义的回调函数。
-   * \param[in] callback User-defined callback function.
    * \param[in] group 用于执行此计时器回调的回调组。
+   *
+   * \param[in] period Time interval between triggers of the callback.
+   * \param[in] callback User-defined callback function.
    * \param[in] group Callback group to execute this timer's callback in.
    */
   template <typename DurationRepT = int64_t, typename DurationT = std::milli, typename CallbackT>
@@ -304,8 +305,8 @@ public:
       CallbackT callback,
       rclcpp::CallbackGroup::SharedPtr group = nullptr);
 
-  /// 创建一个使用节点时钟驱动回调的定时器。 (Create a timer that uses the node clock to drive the
-  /// callback.)
+  /// 创建一个使用节点时钟驱动回调的定时器。
+  /// (Create a timer that uses the node clock to drive the callback.)
   /**
    * \param[in] period 回调触发之间的时间间隔。 (Time interval between triggers of the callback.)
    * \param[in] callback 用户定义的回调函数。 (User-defined callback function.)
@@ -353,16 +354,13 @@ public:
    * \deprecated use rclcpp::QoS instead of rmw_qos_profile_t
    */
   template <typename ServiceT, typename CallbackT>
-  [[deprecated("使用 rclcpp::QoS 代替 rmw_qos_profile_t")]] [[deprecated(
-      "use rclcpp::QoS instead of rmw_qos_profile_t")]]
+  [[deprecated("use rclcpp::QoS instead of rmw_qos_profile_t")]]
   typename rclcpp::Service<ServiceT>::SharedPtr
   create_service(
-      const std::string &service_name,       // 服务名称 (Service name)
-      CallbackT &&callback,                  // 回调函数 (Callback function)
-      const rmw_qos_profile_t &qos_profile,  // QoS 配置文件 (QoS profile)
-      rclcpp::CallbackGroup::SharedPtr group =
-          nullptr);  // 回调组，可选参数，默认为空指针 (Callback group, optional parameter, default
-                     // is nullptr)
+      const std::string &service_name,                    // 服务名称 (Service name)
+      CallbackT &&callback,                               // 回调函数 (Callback function)
+      const rmw_qos_profile_t &qos_profile,               // QoS 配置文件 (QoS profile)
+      rclcpp::CallbackGroup::SharedPtr group = nullptr);  // 回调组，可选参数，默认为空指针
 
   /// 创建并返回一个 Service。
   /// Create and return a Service.
@@ -371,14 +369,10 @@ public:
    */
   template <typename ServiceT, typename CallbackT>
   typename rclcpp::Service<ServiceT>::SharedPtr create_service(
-      const std::string &service_name,  // 服务名称 (Service name)
-      CallbackT &&callback,             // 回调函数 (Callback function)
-      const rclcpp::QoS &qos =
-          rclcpp::ServicesQoS(),  // QoS 设置，默认为 rclcpp::ServicesQoS() (QoS settings, default
-                                  // is rclcpp::ServicesQoS())
-      rclcpp::CallbackGroup::SharedPtr group =
-          nullptr);  // 回调组，可选参数，默认为空指针 (Callback group, optional parameter, default
-                     // is nullptr)
+      const std::string &service_name,                 // 服务名称 (Service name)
+      CallbackT &&callback,                            // 回调函数 (Callback function)
+      const rclcpp::QoS &qos = rclcpp::ServicesQoS(),  // QoS 设置，默认为 rclcpp::ServicesQoS()
+      rclcpp::CallbackGroup::SharedPtr group = nullptr);  // 回调组，可选参数，默认为空指针
 
   /// 创建并返回一个 GenericPublisher。
   /// Create and return a GenericPublisher.
@@ -393,9 +387,7 @@ public:
       const rclcpp::PublisherOptionsWithAllocator<AllocatorT> &options =
           (rclcpp::PublisherOptionsWithAllocator<
               AllocatorT>()));  // 发布器选项，可选参数，默认为
-                                // rclcpp::PublisherOptionsWithAllocator<AllocatorT>() (Publisher
-                                // options, optional parameter, default is
-                                // rclcpp::PublisherOptionsWithAllocator<AllocatorT>())
+                                // rclcpp::PublisherOptionsWithAllocator<AllocatorT>()
 
   /// 创建并返回一个通用订阅 (Create and return a GenericSubscription).
   /**
@@ -412,8 +404,8 @@ public:
           &options =                  ///< 订阅选项 (Subscription options)
       (rclcpp::SubscriptionOptionsWithAllocator<AllocatorT>()));
 
-  /// 声明并初始化一个参数，返回有效值 (Declare and initialize a parameter, return the effective
-  /// value).
+  /// 声明并初始化一个参数，返回有效值
+  /// (Declare and initialize a parameter, return the effective value).
   /**
    * \sa rclcpp::Node::declare_parameter
    */
@@ -426,8 +418,8 @@ public:
       rcl_interfaces::msg::ParameterDescriptor(),
       bool ignore_override = false);  ///< 是否忽略覆盖 (Whether to ignore override)
 
-  /// 声明并初始化一个参数，返回有效值 (Declare and initialize a parameter, return the effective
-  /// value).
+  /// 声明并初始化一个参数，返回有效值
+  /// (Declare and initialize a parameter, return the effective value).
   /**
    * \sa rclcpp::Node::declare_parameter
    */

@@ -26,14 +26,11 @@ namespace node_interfaces {
 /** 虚拟函数定义如下
  * http://design.ros2.org/articles/node_lifecycle.html
  *
- * 如果回调函数执行成功 
- * 则完成指定的转换 
- * 如果回调函数失败或抛出未捕获的异常 
- * 则调用on_error函数 
- * 默认情况下，所有函数都可以选择覆写 
- * 并返回true。除了on_error函数，该函数 
- * 返回false，从而进入关闭/最终状态 
- * 
+ * 如果回调函数执行成功，则完成指定的转换
+ * 如果回调函数失败或抛出未捕获的异常，则调用on_error函数
+ * 默认情况下，所有函数都可以选择覆写，并返回true。
+ * 除了on_error函数，该函数返回false，从而进入关闭/最终状态
+ *
  * (If the callback function returns successfully),
  * (the specified transition is completed).
  * (If the callback function fails or throws an),

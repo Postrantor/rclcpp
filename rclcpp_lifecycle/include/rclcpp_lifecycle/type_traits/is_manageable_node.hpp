@@ -72,7 +72,8 @@ struct has_on_deactivate<
 
 /**
  * @brief 模板结构体 is_manageable_node，检查节点是否可管理（具有 on_activate 和 on_deactivate
- * 成员函数） Template struct is_manageable_node, checks if the node is manageable (has on_activate
+ * 成员函数）
+ * Template struct is_manageable_node, checks if the node is manageable (has on_activate
  * and on_deactivate member functions)
  *
  * @tparam T 类型参数

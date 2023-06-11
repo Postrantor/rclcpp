@@ -59,30 +59,23 @@ LifecycleNode::LifecycleNodeInterfaceImpl::LifecycleNodeInterfaceImpl(
 
 /**
  * @brief 析构函数，用于销毁 LifecycleNodeInterfaceImpl 类的实例。
- *
- * @brief Destructor for destroying an instance of the LifecycleNodeInterfaceImpl class.
+ *       Destructor for destroying an instance of the LifecycleNodeInterfaceImpl class.
  */
 LifecycleNode::LifecycleNodeInterfaceImpl::~LifecycleNodeInterfaceImpl() {
   // 获取 rcl_node_t 类型的节点句柄
-  // Get the rcl_node_t type node handle
   rcl_node_t *node_handle = node_base_interface_->get_rcl_node_handle();
 
   rcl_ret_t ret;
   {
     // 对状态机互斥体进行加锁，以确保线程安全
-    // Lock the state machine mutex to ensure thread safety
     std::lock_guard<std::recursive_mutex> lock(state_machine_mutex_);
-
     // 销毁状态机
-    // Destroy the state machine
     ret = rcl_lifecycle_state_machine_fini(&state_machine_, node_handle);
   }
 
   // 检查销毁状态机是否成功
-  // Check if destroying the state machine was successful
   if (ret != RCL_RET_OK) {
     // 如果失败，输出致命错误日志
-    // If failed, output a fatal error log
     RCUTILS_LOG_FATAL_NAMED("rclcpp_lifecycle", "failed to destroy rcl_state_machine");
   }
 }
@@ -91,35 +84,29 @@ LifecycleNode::LifecycleNodeInterfaceImpl::~LifecycleNodeInterfaceImpl() {
  * @brief 初始化生命周期节点接口实现
  * @param enable_communication_interface 是否启用通信接口
  *
- * Initialize the lifecycle node interface implementation.
+ * @brief Initialize the lifecycle node interface implementation.
  * @param enable_communication_interface Enable communication interface or not.
  */
 void LifecycleNode::LifecycleNodeInterfaceImpl::init(bool enable_communication_interface) {
   // 获取节点句柄
-  // Get the node handle
   rcl_node_t *node_handle = node_base_interface_->get_rcl_node_handle();
 
   // 获取节点选项
-  // Get the node options
   const rcl_node_options_t *node_options =
       rcl_node_get_options(node_base_interface_->get_rcl_node_handle());
 
   // 获取默认状态机选项
-  // Get default state machine options
   auto state_machine_options = rcl_lifecycle_get_default_state_machine_options();
 
   // 设置状态机选项的通信接口和分配器
-  // Set the communication interface and allocator of the state machine options
   state_machine_options.enable_com_interface = enable_communication_interface;
   state_machine_options.allocator = node_options->allocator;
 
   // 初始化状态机，需要五个不同类型支持的发布者/服务
-  // Initialize the state machine, it takes five different typesupports for all publishers/services
   std::lock_guard<std::recursive_mutex> lock(state_machine_mutex_);
   state_machine_ = rcl_lifecycle_get_zero_initialized_state_machine();
 
   // 调用初始化状态机函数
-  // Call the state machine initialization function
   rcl_ret_t ret = rcl_lifecycle_state_machine_init(
       &state_machine_, node_handle,
       ROSIDL_GET_MSG_TYPE_SUPPORT(lifecycle_msgs, msg, TransitionEvent),
@@ -131,7 +118,6 @@ void LifecycleNode::LifecycleNodeInterfaceImpl::init(bool enable_communication_i
       &state_machine_options);
 
   // 检查状态机初始化是否成功
-  // Check if the state machine initialization is successful
   if (ret != RCL_RET_OK) {
     throw std::runtime_error(
         std::string("Couldn't initialize state machine for node ") +
@@ -139,7 +125,6 @@ void LifecycleNode::LifecycleNodeInterfaceImpl::init(bool enable_communication_i
   }
 
   // 获取当前状态
-  // Get the current state
   current_state_ = State(state_machine_.current_state);
 
   // 如果启用通信接口，创建相应的服务

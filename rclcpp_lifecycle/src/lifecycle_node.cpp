@@ -53,22 +53,15 @@ namespace rclcpp_lifecycle {
  *
  * @param node_name 节点的名称 (Name of the node)
  * @param options 节点选项，包括参数、QoS等 (NodeOptions, including parameters, QoS, etc.)
- * @param enable_communication_interface 是否启用通信接口，默认为true (Whether to enable the
- * communication interface, default is true)
+ * @param enable_communication_interface 是否启用通信接口，默认为true
  */
 LifecycleNode::LifecycleNode(
     const std::string &node_name,
     const rclcpp::NodeOptions &options,
     bool enable_communication_interface)
-    : LifecycleNode(
-          node_name,
-          "",
-          options,
-          enable_communication_interface)  // 调用另一个构造函数，传递给定的参数 (Calling another
-                                           // constructor, passing the given arguments)
-{
-  // 这里没有其他操作，因为所有工作都由另一个构造函数完成 (There are no other operations here, as
-  // all work is done by the other constructor)
+    // 调用另一个构造函数，传递给定的参数
+    : LifecycleNode(node_name, "", options, enable_communication_interface) {
+  // 这里没有其他操作，因为所有工作都由另一个构造函数完成
 }
 
 /**
@@ -146,17 +139,15 @@ LifecycleNode::LifecycleNode(
   // 初始化实现类 (Initialize the implementation class)
   impl_->init(enable_communication_interface);
 
+  // clang-format off
   // 注册生命周期回调函数 (Register lifecycle callback functions)
-  register_on_configure(
-      std::bind(&LifecycleNodeInterface::on_configure, this, std::placeholders::_1));
+  register_on_configure(std::bind(&LifecycleNodeInterface::on_configure, this, std::placeholders::_1));
   register_on_cleanup(std::bind(&LifecycleNodeInterface::on_cleanup, this, std::placeholders::_1));
-  register_on_shutdown(
-      std::bind(&LifecycleNodeInterface::on_shutdown, this, std::placeholders::_1));
-  register_on_activate(
-      std::bind(&LifecycleNodeInterface::on_activate, this, std::placeholders::_1));
-  register_on_deactivate(
-      std::bind(&LifecycleNodeInterface::on_deactivate, this, std::placeholders::_1));
+  register_on_shutdown(std::bind(&LifecycleNodeInterface::on_shutdown, this, std::placeholders::_1));
+  register_on_activate(std::bind(&LifecycleNodeInterface::on_activate, this, std::placeholders::_1));
+  register_on_deactivate(std::bind(&LifecycleNodeInterface::on_deactivate, this, std::placeholders::_1));
   register_on_error(std::bind(&LifecycleNodeInterface::on_error, this, std::placeholders::_1));
+  // clang-format on
 }
 
 /**
@@ -179,37 +170,27 @@ LifecycleNode::~LifecycleNode() {
 
 /**
  * @brief 获取节点名称
- *        Get the node name
  * @return 节点名称字符串
- *         Node name string
  */
 const char *LifecycleNode::get_name() const { return node_base_->get_name(); }
 
 /**
  * @brief 获取节点命名空间
- *        Get the node namespace
  * @return 节点命名空间字符串
- *         Node namespace string
  */
 const char *LifecycleNode::get_namespace() const { return node_base_->get_namespace(); }
 
 /**
  * @brief 获取节点日志记录器
- *        Get the node logger
  * @return Logger对象
- *         Logger object
  */
 rclcpp::Logger LifecycleNode::get_logger() const { return node_logging_->get_logger(); }
 
 /**
  * @brief 创建回调组
- *        Create a callback group
  * @param group_type 回调组类型
- *        Callback group type
  * @param automatically_add_to_executor_with_node 是否自动添加到节点执行器
- *        Whether to automatically add to the node executor
  * @return 创建的回调组共享指针
- *         Shared pointer of the created callback group
  */
 rclcpp::CallbackGroup::SharedPtr LifecycleNode::create_callback_group(
     rclcpp::CallbackGroupType group_type, bool automatically_add_to_executor_with_node) {
@@ -229,8 +210,7 @@ const rclcpp::ParameterValue &LifecycleNode::declare_parameter(
     const rclcpp::ParameterValue &default_value,
     const rcl_interfaces::msg::ParameterDescriptor &parameter_descriptor,
     bool ignore_override) {
-  // 调用 node_parameters_ 的 declare_parameter 方法来声明参数 (Call the declare_parameter method of
-  // node_parameters_ to declare the parameter)
+  // 调用 node_parameters_ 的 declare_parameter 方法来声明参数
   return this->node_parameters_->declare_parameter(
       name, default_value, parameter_descriptor, ignore_override);
 }
@@ -248,8 +228,8 @@ const rclcpp::ParameterValue &LifecycleNode::declare_parameter(
     rclcpp::ParameterType type,
     const rcl_interfaces::msg::ParameterDescriptor &parameter_descriptor,
     bool ignore_override) {
-  // 调用 node_parameters_ 的 declare_parameter 方法来声明参数 (Call the declare_parameter method of
-  // node_parameters_ to declare the parameter)
+  // 调用 node_parameters_ 的 declare_parameter 方法来声明参数
+  // (Call the declare_parameter method of node_parameters_ to declare the parameter)
   return this->node_parameters_->declare_parameter(
       name, type, parameter_descriptor, ignore_override);
 }
@@ -259,8 +239,8 @@ const rclcpp::ParameterValue &LifecycleNode::declare_parameter(
  *  @param name 参数名称 (Parameter name)
  */
 void LifecycleNode::undeclare_parameter(const std::string &name) {
-  // 调用 node_parameters_ 的 undeclare_parameter 方法来取消声明参数 (Call the undeclare_parameter
-  // method of node_parameters_ to undeclare the parameter)
+  // 调用 node_parameters_ 的 undeclare_parameter 方法来取消声明参数
+  // (Call the undeclare_parameter method of node_parameters_ to undeclare the parameter)
   this->node_parameters_->undeclare_parameter(name);
 }
 
@@ -439,8 +419,8 @@ std::vector<uint8_t> LifecycleNode::get_parameter_types(
  */
 rcl_interfaces::msg::ListParametersResult LifecycleNode::list_parameters(
     const std::vector<std::string> &prefixes, uint64_t depth) const {
-  // 调用 node_parameters_ 的 list_parameters 方法并返回结果 (Call the list_parameters method of
-  // node_parameters_ and return the result)
+  // 调用 node_parameters_ 的 list_parameters 方法并返回结果
+  // (Call the list_parameters method of node_parameters_ and return the result)
   return node_parameters_->list_parameters(prefixes, depth);
 }
 
@@ -476,13 +456,11 @@ LifecycleNode::add_on_set_parameters_callback(OnSetParametersCallbackType callba
  * @brief 添加后置参数回调 (Add post-set parameters callback)
  *
  * @param callback 后置参数回调类型 (Post-set parameters callback type)
- * @return rclcpp::Node::PostSetParametersCallbackHandle::SharedPtr 后置参数回调句柄共享指针 (Shared
- * pointer of post-set parameters callback handle)
+ * @return rclcpp::Node::PostSetParametersCallbackHandle::SharedPtr 后置参数回调句柄共享指针
  */
 rclcpp::Node::PostSetParametersCallbackHandle::SharedPtr
 LifecycleNode::add_post_set_parameters_callback(PostSetParametersCallbackType callback) {
-  // 调用 node_parameters_ 的 add_post_set_parameters_callback 方法并返回结果 (Call the
-  // add_post_set_parameters_callback method of node_parameters_ and return the result)
+  // 调用 node_parameters_ 的 add_post_set_parameters_callback 方法并返回结果
   return node_parameters_->add_post_set_parameters_callback(callback);
 }
 
@@ -493,8 +471,8 @@ LifecycleNode::add_post_set_parameters_callback(PostSetParametersCallbackType ca
  */
 void LifecycleNode::remove_pre_set_parameters_callback(
     const PreSetParametersCallbackHandle *const callback) {
-  // 调用 node_parameters_ 的 remove_pre_set_parameters_callback 方法 (Call the
-  // remove_pre_set_parameters_callback method of node_parameters_)
+  // 调用 node_parameters_ 的 remove_pre_set_parameters_callback 方法
+  // (Call the remove_pre_set_parameters_callback method of node_parameters_)
   node_parameters_->remove_pre_set_parameters_callback(callback);
 }
 
@@ -536,7 +514,6 @@ std::vector<std::string> LifecycleNode::get_node_names() const {
 
 /**
  * @brief 获取话题名称和类型 (Get topic names and types)
- *
  * @param[in] no_demangle 是否对 C++ 类型进行解析 (Whether to parse C++ types)
  * @return std::map<std::string, std::vector<std::string>> 话题名称和类型映射 (Mapping of topic
  * names and types)
@@ -551,20 +528,16 @@ std::map<std::string, std::vector<std::string>> LifecycleNode::get_topic_names_a
 
 /**
  * @brief 获取服务名称和类型 (Get service names and types)
- *
  * @return std::map<std::string, std::vector<std::string>> 服务名称和类型映射 (Mapping of service
  * names and types)
  */
 std::map<std::string, std::vector<std::string>> LifecycleNode::get_service_names_and_types() const {
   // 调用 node_graph_ 的 get_service_names_and_types 方法获取服务名称和类型映射
-  // (Call the get_service_names_and_types method of node_graph_ to get the mapping of service names
-  // and types)
   return node_graph_->get_service_names_and_types();
 }
 
 /**
- * @brief 根据节点名称和命名空间获取服务名称和类型 (Get service names and types by node name and
- * namespace)
+ * @brief 根据节点名称和命名空间获取服务名称和类型
  *
  * @param[in] node_name 节点名称 (Node name)
  * @param[in] namespace_ 命名空间 (Namespace)
@@ -574,8 +547,6 @@ std::map<std::string, std::vector<std::string>> LifecycleNode::get_service_names
 std::map<std::string, std::vector<std::string>> LifecycleNode::get_service_names_and_types_by_node(
     const std::string &node_name, const std::string &namespace_) const {
   // 调用 node_graph_ 的 get_service_names_and_types_by_node 方法获取服务名称和类型映射
-  // (Call the get_service_names_and_types_by_node method of node_graph_ to get the mapping of
-  // service names and types)
   return node_graph_->get_service_names_and_types_by_node(node_name, namespace_);
 }
 
@@ -599,7 +570,6 @@ size_t LifecycleNode::count_publishers(const std::string &topic_name) const {
  */
 size_t LifecycleNode::count_subscribers(const std::string &topic_name) const {
   // 调用 node_graph_ 的 count_subscribers 方法统计订阅者数量
-  // (Call the count_subscribers method of node_graph_ to count the number of subscribers)
   return node_graph_->count_subscribers(topic_name);
 }
 
@@ -613,8 +583,6 @@ size_t LifecycleNode::count_subscribers(const std::string &topic_name) const {
 std::vector<rclcpp::TopicEndpointInfo> LifecycleNode::get_publishers_info_by_topic(
     const std::string &topic_name, bool no_mangle) const {
   // 调用 node_graph_ 的 get_publishers_info_by_topic 方法获取发布者信息列表
-  // (Call the get_publishers_info_by_topic method of node_graph_ to get the list of publisher
-  // information)
   return node_graph_->get_publishers_info_by_topic(topic_name, no_mangle);
 }
 
@@ -628,8 +596,6 @@ std::vector<rclcpp::TopicEndpointInfo> LifecycleNode::get_publishers_info_by_top
 std::vector<rclcpp::TopicEndpointInfo> LifecycleNode::get_subscriptions_info_by_topic(
     const std::string &topic_name, bool no_mangle) const {
   // 调用 node_graph_ 的 get_subscriptions_info_by_topic 方法获取订阅者信息列表
-  // (Call the get_subscriptions_info_by_topic method of node_graph_ to get the list of subscriber
-  // information)
   return node_graph_->get_subscriptions_info_by_topic(topic_name, no_mangle);
 }
 
@@ -815,6 +781,9 @@ LifecycleNode::get_node_waitables_interface() {
  */
 const rclcpp::NodeOptions &LifecycleNode::get_node_options() const { return node_options_; }
 
+/* ========= =========
+========= ========= */
+
 /**
  * @brief 注册配置回调函数
  * @param fcn 配置回调函数
@@ -908,9 +877,11 @@ bool LifecycleNode::register_on_error(
       lifecycle_msgs::msg::State::TRANSITION_STATE_ERRORPROCESSING, fcn);
 }
 
+/* ========= =========
+========= ========= */
+
 /**
  * @brief 获取当前节点的状态 (Get the current state of the node)
- *
  * @return 当前节点的状态引用 (A reference to the current state of the node)
  */
 const State &LifecycleNode::get_current_state() const { return impl_->get_current_state(); }
@@ -926,7 +897,6 @@ std::vector<State> LifecycleNode::get_available_states() const {
 
 /**
  * @brief 获取可用转换列表 (Get the list of available transitions)
- *
  * @return 可用转换的向量 (A vector of available transitions)
  */
 std::vector<Transition> LifecycleNode::get_available_transitions() const {
@@ -935,16 +905,17 @@ std::vector<Transition> LifecycleNode::get_available_transitions() const {
 
 /**
  * @brief 获取转换图 (Get the transition graph)
- *
  * @return 转换图的向量 (A vector representing the transition graph)
  */
 std::vector<Transition> LifecycleNode::get_transition_graph() const {
   return impl_->get_transition_graph();
 }
 
+/* ========= =========
+========= ========= */
+
 /**
  * @brief 触发给定转换 (Trigger the given transition)
- *
  * @param transition 要触发的转换 (The transition to trigger)
  * @return 触发转换后的节点状态引用 (A reference to the node state after triggering the transition)
  */
@@ -953,9 +924,8 @@ const State &LifecycleNode::trigger_transition(const Transition &transition) {
 }
 
 /**
- * @brief 触发给定转换，并获取回调函数的返回代码 (Trigger the given transition and get the return
- * code of the callback function)
- *
+ * @brief 触发给定转换，并获取回调函数的返回代码
+ *    (Trigger the given transition and get the return code of the callback function)
  * @param transition 要触发的转换 (The transition to trigger)
  * @param cb_return_code 回调函数的返回代码 (The return code of the callback function)
  * @return 触发转换后的节点状态引用 (A reference to the node state after triggering the transition)
@@ -1122,6 +1092,9 @@ node_interfaces::LifecycleNodeInterface::CallbackReturn LifecycleNode::on_deacti
   // 返回成功状态 (Return success status)
   return LifecycleNodeInterface::CallbackReturn::SUCCESS;
 }
+
+/* ========= =========
+========= ========= */
 
 /**
  * @brief 添加托管实体 (Add managed entity)
