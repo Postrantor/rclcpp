@@ -1082,8 +1082,7 @@ node_interfaces::LifecycleNodeInterface::CallbackReturn LifecycleNode::on_activa
 /**
  * @brief 在停用状态下执行的操作 (Operations to be performed in the deactivate state)
  * @param state 当前状态 (Current state)
- * @return node_interfaces::LifecycleNodeInterface::CallbackReturn 返回成功状态 (Return success
- * status)
+ * @return node_interfaces::LifecycleNodeInterface::CallbackReturn 返回成功状态
  */
 node_interfaces::LifecycleNodeInterface::CallbackReturn LifecycleNode::on_deactivate(
     const State &) {

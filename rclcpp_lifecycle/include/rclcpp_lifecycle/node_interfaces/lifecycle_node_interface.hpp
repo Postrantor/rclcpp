@@ -22,6 +22,7 @@
 
 namespace rclcpp_lifecycle {
 namespace node_interfaces {
+
 /// 生命周期节点接口类 (Interface class for a managed node).
 /** 虚拟函数定义如下
  * http://design.ros2.org/articles/node_lifecycle.html
@@ -31,19 +32,14 @@ namespace node_interfaces {
  * 默认情况下，所有函数都可以选择覆写，并返回true。
  * 除了on_error函数，该函数返回false，从而进入关闭/最终状态
  *
- * (If the callback function returns successfully),
- * (the specified transition is completed).
- * (If the callback function fails or throws an),
- * (uncaught exception, the on_error function is called).
- * (By default, all functions remain optional to overwrite)
- * (and return true. Except the on_error function, which)
- * (returns false and thus goes to shutdown/finalize state).
+ * (If the callback function returns successfully, the specified transition is completed. If the
+ * callback function fails or throws an, uncaught exception, the on_error function is called. By
+ * default, all functions remain optional to overwrite and return true. Except the on_error
+ * function, which returns false and thus goes to shutdown/finalize state).
  */
 class LifecycleNodeInterface {
 protected:
-  // RCLCPP_LIFECYCLE_PUBLIC宏用于声明符号可见性
   RCLCPP_LIFECYCLE_PUBLIC
-  // 生命周期节点接口构造函数
   LifecycleNodeInterface() {}
 
 public:

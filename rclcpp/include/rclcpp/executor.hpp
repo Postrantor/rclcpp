@@ -445,12 +445,13 @@ public:
     std::chrono::nanoseconds timeout_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
         timeout);  // 将超时时间转换为纳秒（Convert the timeout duration to nanoseconds）
 
+    // 如果超时时间大于0，计算结束时间
+    // （If the timeout duration is greater than 0, calculate the end time）
     if (timeout_ns > std::chrono::nanoseconds::zero()) {
-      end_time += timeout_ns;  // 如果超时时间大于0，计算结束时间（If the timeout duration is
-                               // greater than 0, calculate the end time）
+      end_time += timeout_ns;
     }
-    std::chrono::nanoseconds timeout_left =
-        timeout_ns;  // 初始化剩余超时时间（Initialize the remaining timeout duration）
+    // 初始化剩余超时时间（Initialize the remaining timeout duration）
+    std::chrono::nanoseconds timeout_left = timeout_ns;
 
     // 如果已经在旋转，则抛出异常（Throw an exception if already spinning）
     if (spinning.exchange(true)) {
@@ -471,20 +472,21 @@ public:
       }
       // If the original timeout is < 0, then this is blocking, never TIMEOUT.
       if (timeout_ns < std::chrono::nanoseconds::zero()) {
-        // 如果原始超时时间小于0，则为阻塞，永不超时（If the original timeout duration is less than
-        // 0, this is blocking and will never timeout）
+        // 如果原始超时时间小于0，则为阻塞，永不超时
+        // （If the original timeout duration is less than 0, this is blocking and will never
+        // timeout）
         continue;
       }
       // Otherwise check if we still have time to wait, return TIMEOUT if not.
       auto now = std::chrono::steady_clock::now();  // 获取当前时间（Get the current time）
+      // 如果当前时间大于等于结束时间
+      // （If the current time is greater than or equal to the end time）
       if (now >= end_time) {
-        // 如果当前时间大于等于结束时间（If the current time is greater than or equal to the end
-        // time）
         return FutureReturnCode::TIMEOUT;  // 返回超时（Return timeout）
       }
       // Subtract the elapsed time from the original timeout.
-      timeout_left = std::chrono::duration_cast<std::chrono::nanoseconds>(
-          end_time - now);  // 计算剩余超时时间（Calculate the remaining timeout duration）
+      // 计算剩余超时时间（Calculate the remaining timeout duration）
+      timeout_left = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - now);
     }
 
     // The future did not complete before ok() returned false, return INTERRUPTED.

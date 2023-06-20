@@ -45,11 +45,6 @@ namespace rclcpp_lifecycle {
  * @brief 构造函数，用于初始化 LifecycleNodeInterfaceImpl 类的实例。
  * @param node_base_interface 一个共享指针，指向 NodeBaseInterface 类的实例。
  * @param node_services_interface 一个共享指针，指向 NodeServicesInterface 类的实例。
- *
- * @brief Constructor for initializing an instance of the LifecycleNodeInterfaceImpl class.
- * @param node_base_interface A shared_ptr pointing to an instance of the NodeBaseInterface class.
- * @param node_services_interface A shared_ptr pointing to an instance of the NodeServicesInterface
- * class.
  */
 LifecycleNode::LifecycleNodeInterfaceImpl::LifecycleNodeInterfaceImpl(
     std::shared_ptr<rclcpp::node_interfaces::NodeBaseInterface> node_base_interface,
@@ -59,7 +54,6 @@ LifecycleNode::LifecycleNodeInterfaceImpl::LifecycleNodeInterfaceImpl(
 
 /**
  * @brief 析构函数，用于销毁 LifecycleNodeInterfaceImpl 类的实例。
- *       Destructor for destroying an instance of the LifecycleNodeInterfaceImpl class.
  */
 LifecycleNode::LifecycleNodeInterfaceImpl::~LifecycleNodeInterfaceImpl() {
   // 获取 rcl_node_t 类型的节点句柄
@@ -73,9 +67,8 @@ LifecycleNode::LifecycleNodeInterfaceImpl::~LifecycleNodeInterfaceImpl() {
     ret = rcl_lifecycle_state_machine_fini(&state_machine_, node_handle);
   }
 
-  // 检查销毁状态机是否成功
+  // 检查销毁状态机是否成功，如果失败，输出致命错误日志
   if (ret != RCL_RET_OK) {
-    // 如果失败，输出致命错误日志
     RCUTILS_LOG_FATAL_NAMED("rclcpp_lifecycle", "failed to destroy rcl_state_machine");
   }
 }
@@ -83,9 +76,6 @@ LifecycleNode::LifecycleNodeInterfaceImpl::~LifecycleNodeInterfaceImpl() {
 /**
  * @brief 初始化生命周期节点接口实现
  * @param enable_communication_interface 是否启用通信接口
- *
- * @brief Initialize the lifecycle node interface implementation.
- * @param enable_communication_interface Enable communication interface or not.
  */
 void LifecycleNode::LifecycleNodeInterfaceImpl::init(bool enable_communication_interface) {
   // 获取节点句柄
@@ -106,9 +96,14 @@ void LifecycleNode::LifecycleNodeInterfaceImpl::init(bool enable_communication_i
   std::lock_guard<std::recursive_mutex> lock(state_machine_mutex_);
   state_machine_ = rcl_lifecycle_get_zero_initialized_state_machine();
 
+  // clang-format off
   // 调用初始化状态机函数
+  // ROSIDL_GET_MSG_TYPE_SUPPORT函数是用于获取消息类型支持对象的函数，它的作用是为了获得消息类型支持库代码的起始指针。因为消息实例需要通
+  // 过类型支持库（Type Support）来序列化和反序列化，所以在将消息发布到主题之前，需要先引用类型支持库来确保正确性和数据精度。ROSIDL_GET_MSG_TYPE_SUPPORT函数返回的是一个指针，该指针包含类型支持库的有关信息。这些信息可以用于在消息发布时指定所需的类型支持。因此，在ROS2系
+  // 统中使用此函数来获得消息类型支持对象。具体使用方式请参考上面的示例代码。
   rcl_ret_t ret = rcl_lifecycle_state_machine_init(
-      &state_machine_, node_handle,
+      &state_machine_,  //
+      node_handle,      //
       ROSIDL_GET_MSG_TYPE_SUPPORT(lifecycle_msgs, msg, TransitionEvent),
       rosidl_typesupport_cpp::get_service_type_support_handle<ChangeStateSrv>(),
       rosidl_typesupport_cpp::get_service_type_support_handle<GetStateSrv>(),
@@ -116,6 +111,7 @@ void LifecycleNode::LifecycleNodeInterfaceImpl::init(bool enable_communication_i
       rosidl_typesupport_cpp::get_service_type_support_handle<GetAvailableTransitionsSrv>(),
       rosidl_typesupport_cpp::get_service_type_support_handle<GetAvailableTransitionsSrv>(),
       &state_machine_options);
+  // clang-format on
 
   // 检查状态机初始化是否成功
   if (ret != RCL_RET_OK) {
@@ -128,7 +124,7 @@ void LifecycleNode::LifecycleNodeInterfaceImpl::init(bool enable_communication_i
   current_state_ = State(state_machine_.current_state);
 
   // 如果启用通信接口，创建相应的服务
-  // If the communication interface is enabled, create the corresponding services
+  // 果然，从这个变量开启使能这个 lifecycle node 的能力
   if (enable_communication_interface) {
     {  // change_state
       auto cb = std::bind(

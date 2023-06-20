@@ -20,22 +20,16 @@
 
 /**
  * @brief 模板结构体 has_on_activate，检查是否存在 on_activate 成员函数
- * Template struct has_on_activate, checks for the existence of an on_activate member function
- *
  * @tparam T 类型参数
  * @tparam typename 用于 SFINAE 的类型，默认为 void
- * @tparam T Type parameter
- * @tparam typename Type used for SFINAE, defaults to void
  */
 template <class T, typename = void>
 struct has_on_activate {
   // 默认值为 false
-  // Default value is false
   static constexpr bool value = false;
 };
 
 // 特化版本，当 T 类型中存在 on_activate 成员函数时，value 为 true
-// Specialized version, when there's an on_activate member function in type T, value is true
 template <class T>
 struct has_on_activate<
     T,
@@ -46,22 +40,16 @@ struct has_on_activate<
 
 /**
  * @brief 模板结构体 has_on_deactivate，检查是否存在 on_deactivate 成员函数
- * Template struct has_on_deactivate, checks for the existence of an on_deactivate member function
- *
  * @tparam T 类型参数
  * @tparam typename 用于 SFINAE 的类型，默认为 void
- * @tparam T Type parameter
- * @tparam typename Type used for SFINAE, defaults to void
  */
 template <class T, typename = void>
 struct has_on_deactivate {
   // 默认值为 false
-  // Default value is false
   static constexpr bool value = false;
 };
 
 // 特化版本，当 T 类型中存在 on_deactivate 成员函数时，value 为 true
-// Specialized version, when there's an on_deactivate member function in type T, value is true
 template <class T>
 struct has_on_deactivate<
     T,
@@ -73,20 +61,13 @@ struct has_on_deactivate<
 /**
  * @brief 模板结构体 is_manageable_node，检查节点是否可管理（具有 on_activate 和 on_deactivate
  * 成员函数）
- * Template struct is_manageable_node, checks if the node is manageable (has on_activate
- * and on_deactivate member functions)
- *
  * @tparam T 类型参数
  * @tparam typename 用于 SFINAE 的类型，默认为 void
- * @tparam T Type parameter
- * @tparam typename Type used for SFINAE, defaults to void
  */
 template <class T, typename = void>
 struct is_manageable_node : std::false_type {};
 
 // 特化版本，当 T 类型中同时存在 on_activate 和 on_deactivate 成员函数时，继承自 std::true_type
-// Specialized version, when both on_activate and on_deactivate member functions exist in type T,
-// inherits from std::true_type
 template <class T>
 struct is_manageable_node<
     T,

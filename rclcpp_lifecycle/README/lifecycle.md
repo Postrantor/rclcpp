@@ -1,6 +1,6 @@
 ## 可以系统介绍一下 ros2 中 rclcpp_lifecycle 组件吗
 
-`rclcpp_lifecycle` 是 ROS2(Robot Operating System 2)中的一个库，用于实现生命周期节点(Lifecycle nodes)。生命周期节点是一种特殊类型的节点，它**具有预定义的状态和转换**，使得开发者能够更好地管理节点的生命周期。这有助于提高系统的健壮性和可维护性。
+`rclcpp_lifecycle` 是 ROS2(Robot Operating System 2)中的一个库，用于实现生命周期节点(Lifecycle nodes)。生命周期节点是一种特殊类型的节点，它**具有预定义的状态和转换**，使得开发者能够更好地管理节点的生命周期。这**有助于提高系统的健壮性和可维护性**。
 
 生命周期节点基于以下五个核心状态：
 
@@ -10,7 +10,10 @@
 4. **暂停(Deactivating)**： 节点正在从活动状态转换为不活动状态。在这个过程中，节点可能需要停止处理数据并释放某些资源。
 5. **清除(Cleaning up)**： 节点正在撤销配置并释放所有资源。在完成清理后，节点将返回到未配置状态。
 
-生命周期节点之间的状态转换是通过生命周期管理器(Lifecycle Manager)进行的。例如，可以通过生命周期管理器将节点从“不活动”状态转换为“活动”状态。
+**生命周期节点之间的状态转换是通过生命周期管理器(Lifecycle Manager)进行的**。例如，可以通过生命周期管理器将节点从“不活动”状态转换为“活动”状态。
+
+> [!NOTE]
+> 这里提到是要通过 lifecycle manager 实现生命周期的管理！
 
 要在 ROS2 中实现生命周期节点，可以使用 `rclcpp_lifecycle` 组件。首先，需要包含相关头文件：
 
@@ -60,13 +63,16 @@ this->add_on_activate_transition_callback(std::bind(&MyLifecycleNode::on_activat
 // 添加其他生命周期回调函数...
 ```
 
-现在，已经创建了一个具有生命周期管理功能的 ROS2 节点。在运行节点时，可以使用 `ros2 lifecycle` 命令来手动控制节点的状态转换，或者在代码中使用生命周期管理器实现自动状态转换。
+现在，已经创建了一个具有生命周期管理功能的 ROS2 节点。在运行节点时，可以
+
+- 使用 `ros2 lifecycle` 命令来手动控制节点的状态转换，或者
+- **在代码中使用生命周期管理器实现自动状态转换**。
 
 ## 如何使用生命周期管理器控制节点的状态转换？
 
-要使用生命周期管理器(Lifecycle Manager)控制生命周期节点的状态转换，你可以通过客户端 API 发送生命周期转换请求。在 ROS2 中，可以使用 `rclcpp::LifecycleNode` 的 `rclcpp::LifecycleNode::trigger_transition` 方法将生命周期节点从一个状态转换到另一个状态。
+要**使用生命周期管理器(Lifecycle Manager)控制生命周期节点的状态转换，你可以通过客户端 API 发送生命周期转换请求**。在 ROS2 中，可以使用 `rclcpp::LifecycleNode` 的 `rclcpp::LifecycleNode::trigger_transition` 方法将生命周期节点从一个状态转换到另一个状态。
 
-以下是一个简单的示例，展示了如何**创建一个客户端节点来控制生命周期节点的状态转换**：
+以下是一个简单的示例，展示了如何**创建一个客户端节点(manager?)来控制生命周期节点的状态转换**：
 
 首先，包含必要的头文件：
 
@@ -91,7 +97,7 @@ public:
 };
 ```
 
-然后，在构造函数中实例化一个生命周期客户端，用于与生命周期节点通信：
+然后，在构造函数中**实例化一个生命周期客户端，用于与生命周期节点通信**：
 
 ```cpp
 lifecycle_client_ = std::make_shared<rclcpp_lifecycle::LifecycleServiceClient>(this, "my_lifecycle_node");
@@ -106,6 +112,7 @@ void start_lifecycle_node()
   lifecycle_client_->wait_for_service();
 
   // 将节点配置为 Inactive 状态
+  //? 不太清楚
   auto configure_request = std::make_shared<rclcpp_lifecycle::srv::ChangeState::Request>();
   configure_request->transition.id = rclcpp_lifecycle::Transition::TRANSITION_CONFIGURE;
   auto configure_future = lifecycle_client_->async_send_request(configure_request);
@@ -139,12 +146,9 @@ void start_lifecycle_node()
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
-
   auto controller = std::make_shared<LifecycleController>();
-
   // 控制生命周期节点
   controller->start_lifecycle_node();
-
   rclcpp::shutdown();
   return 0;
 }
@@ -156,7 +160,7 @@ int main(int argc, char ** argv)
 
 要将生命周期节点从 Active 状态转换为 Inactive 状态，你可以向生命周期节点发送一个 `TRANSITION_DEACTIVATE` 转换请求。以下是一个示例，展示了如何在生命周期控制器中实现这个状态转换：
 
-首先，确保你已经包含了必要的头文件，并创建了一个继承自 `rclcpp::Node` 的控制器类。在这个类中，实例化一个生命周期客户端，用于与生命周期节点通信，如前面的示例所示。
+首先，确保你已经包含了必要的头文件，并创建了一个继承自 `rclcpp::Node` 的控制器类。在这个类中，**实例化一个生命周期客户端，用于与生命周期节点通信**，如前面的示例所示。
 
 接下来，实现一个将生命周期节点从 Active 状态转换为 Inactive 状态的函数：
 
@@ -188,19 +192,16 @@ void deactivate_lifecycle_node()
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
-
   auto controller = std::make_shared<LifecycleController>();
-
   // 控制生命周期节点
   // 注意：确保你的生命周期节点处于 Active 状态，否则去激活操作将失败
   controller->deactivate_lifecycle_node();
-
   rclcpp::shutdown();
   return 0;
 }
 ```
 
-运行这个示例，生命周期控制器将尝试将生命周期节点从 Active 状态转换为 Inactive 状态。如果生命周期节点已经处于 Active 状态，那么这个操作将成功。如果节点不在 Active 状态，去激活操作将失败。为了确保转换成功，可以在尝试去激活之前先激活节点，或者检查节点当前的状态。
+运行这个示例，生命周期控制器将尝试将生命周期节点从 Active 状态转换为 Inactive 状态。如果生命周期节点已经处于 Active 状态，那么这个操作将成功。如果节点不在 Active 状态，去激活操作将失败。**为了确保转换成功，可以在尝试去激活之前先激活节点，或者检查节点当前的状态**。
 
 ## 如何检查生命周期节点的当前状态？
 
@@ -239,22 +240,19 @@ void query_lifecycle_node_state()
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
-
   auto controller = std::make_shared<LifecycleController>();
-
   // 查询生命周期节点的当前状态
   controller->query_lifecycle_node_state();
-
   rclcpp::shutdown();
   return 0;
 }
 ```
 
-运行这个示例，生命周期控制器将查询生命周期节点的当前状态，并将其打印到控制台。你可以根据需要在代码中使用这个状态信息，例如，在尝试激活或去激活节点之前检查节点的当前状态。
+运行这个示例，生命周期控制器将查询生命周期节点的当前状态，并将其打印到控制台。你**可以根据需要在代码中使用这个状态信息**，例如，在尝试激活或去激活节点之前检查节点的当前状态。
 
 ## 如何激活生命周期节点？
 
-要激活生命周期节点，你需要向生命周期节点发送一个 `TRANSITION_ACTIVATE` 转换请求。以下是一个示例，展示了如何在生命周期控制器中实现激活生命周期节点：
+要激活生命周期节点，你需要向生命周期节点**发送一个 `TRANSITION_ACTIVATE` 转换请求**。以下是一个示例，展示了如何在生命周期控制器中实现激活生命周期节点：
 
 首先，确保你已经包含了必要的头文件，并创建了一个继承自 `rclcpp::Node` 的控制器类。在这个类中，实例化一个生命周期客户端，用于与生命周期节点通信，如前面的示例所示。
 
@@ -288,13 +286,10 @@ void activate_lifecycle_node()
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
-
   auto controller = std::make_shared<LifecycleController>();
-
   // 激活生命周期节点
   // 注意：确保你的生命周期节点处于 Inactive 状态，否则激活操作将失败
   controller->activate_lifecycle_node();
-
   rclcpp::shutdown();
   return 0;
 }
@@ -363,18 +358,15 @@ public:
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
-
+  //? 再详细问一下，这里的manager
   // 创建生命周期节点
   auto lifecycle_node = std::make_shared<MyLifecycleNode>();
-
   // 创建生命周期管理器
   auto lifecycle_manager = std::make_shared<rclcpp_lifecycle::LifecycleNodeInterface>(lifecycle_node);
-
   // 运行生命周期管理器
   rclcpp::executors::SingleThreadedExecutor executor;
   executor.add_node(lifecycle_manager->get_node_base_interface());
   executor.spin();
-
   rclcpp::shutdown();
   return 0;
 }
@@ -467,18 +459,14 @@ public:
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
-
   // 创建生命周期节点
   auto lifecycle_node = std::make_shared<MyLifecycleNode>();
-
   // 创建生命周期管理器
   auto lifecycle_manager = std::make_shared<rclcpp_lifecycle::LifecycleNodeInterface>(lifecycle_node);
-
   // 运行生命周期管理器
   rclcpp::executors::SingleThreadedExecutor executor;
   executor.add_node(lifecycle_manager->get_node_base_interface());
   executor.spin();
-
   rclcpp::shutdown();
   return 0;
 }
@@ -488,7 +476,7 @@ int main(int argc, char ** argv)
 
 ## 如何使用生命周期管理器控制节点的状态转换？
 
-要使用生命周期管理器控制节点的状态转换，你需要创建一个生命周期管理器并将其连接到生命周期节点。然后，你可以使用生命周期管理器提供的方法来触发状态转换。以下是一个示例，展示了如何使用生命周期管理器控制节点的状态转换：
+要使用生命周期管理器控制节点的状态转换，你需要**创建一个生命周期管理器并将其连接到生命周期节点**。然后，你可以使用生命周期管理器提供的方法来触发状态转换。以下是一个示例，展示了如何使用生命周期管理器控制节点的状态转换：
 
 1. 首先，确保你已经包含了必要的头文件，并创建了一个继承自 `rclcpp_lifecycle::LifecycleNode` 的节点类。这个类应该包含了你的生命周期节点实现。
 
@@ -518,18 +506,14 @@ public:
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
-
   // 创建生命周期节点
   auto lifecycle_node = std::make_shared<MyLifecycleNode>();
-
   // 创建生命周期管理器
   auto lifecycle_manager = std::make_shared<rclcpp_lifecycle::LifecycleNodeInterface>(lifecycle_node);
-
   // 运行生命周期管理器
   rclcpp::executors::SingleThreadedExecutor executor;
   executor.add_node(lifecycle_manager->get_node_base_interface());
   executor.spin();
-
   rclcpp::shutdown();
   return 0;
 }
@@ -615,13 +599,13 @@ int main(int argc, char ** argv)
 }
 ```
 
-这个示例展示了如何使用生命周期管理器来控制节点的状态转换。在这个示例中，我们首先配置节点，然后激活节点。在执行期间，节点会保持激活状态。当我们需要停止节点时，我们先将节点取消激活，然后进行清理。
+这个示例展示了如何使用生命周期管理器来控制节点的状态转换。在这个示例中，我们**首先配置节点，然后激活节点。在执行期间，节点会保持激活状态。当我们需要停止节点时，我们先将节点取消激活，然后进行清理**。
 
-请注意，这个示例仅用于演示目的。在实际应用中，你可能需要根据特定的应用逻辑或外部事件来触发节点的状态转换。例如，你可以使用一个服务或动作服务器来接收状态转换请求，并使用生命周期管理器来控制节点的状态转换。
+请注意，这个示例仅用于演示目的。在实际应用中，你可能**需要根据特定的应用逻辑或外部事件来触发节点的状态转换**。例如，你可以**使用一个服务或动作服务器来接收状态转换请求，并使用生命周期管理器来控制节点的状态转换**。
 
 ## 如何使用服务或动作服务器来触发节点的状态转换？
 
-要使用服务或动作服务器触发节点的状态转换，你需要为生命周期状态转换创建一个服务或动作，然后在回调中调用生命周期管理器的方法来触发状态转换。以下是一个使用服务触发状态转换的示例：
+要使用服务或动作服务器触发节点的状态转换，你**需要为生命周期状态转换创建一个服务或动作**，然后**在回调中调用生命周期管理器的方法来触发状态转换**。以下是一个使用服务触发状态转换的示例：
 
 1. 首先，创建一个用于触发状态转换的服务。例如，我们可以定义一个名为 `TriggerTransition` 的服务，它接收一个整数参数 `transition_id`，用于表示要触发的状态转换。
 
@@ -661,7 +645,7 @@ private:
 };
 ```
 
-3. 在回调函数中，根据 `transition_id` 调用生命周期管理器的方法来触发相应的状态转换。例如，你可以根据以下映射来触发状态转换：
+3. **在回调函数中，根据 `transition_id` 调用生命周期管理器的方法来触发相应的状态转换**。例如，你可以根据以下映射来触发状态转换：
 
 - `TRANSITION_CONFIGURE`: 1
 - `TRANSITION_ACTIVATE`: 2
@@ -883,6 +867,9 @@ ros2 action send_goal /my_lifecycle_node/trigger_transition your_package/action/
 5. `on_shutdown`：在节点关闭时调用。
 6. `on_error`：在节点遇到错误时调用。
 
+> [!NOTE]
+> 是不是依据 rcl_lifecycle 中给出的转换，应该还可以扩充很多的内容。
+
 要自定义行为，您可以在从 `rclcpp_lifecycle::LifecycleNode` 派生的自定义生命周期节点类中覆盖这些方法。以下是一个示例：
 
 ```cpp
@@ -1101,9 +1088,14 @@ private:
 
 ## 如何在生命周期节点类中添加其他类型的 ROS 组件？
 
-在生命周期节点类中添加其他类型的 ROS 组件(如定时器、服务、客户端等)的过程与添加发布者和订阅者类似。您需要使用生命周期节点兼容的组件。
+在生命周期节点类中**添加其他类型的 ROS 组件(如定时器、服务、客户端等)的过程与添加发布者和订阅者类似**。您需要使用生命周期节点兼容的组件。
 
 以定时器为例，要在生命周期节点中添加定时器，您需要使用 `rclcpp_lifecycle::LifecycleNode::create_wall_timer` 方法。这是一个创建定时器的示例：
+
+> [!NOTE]
+> 这里给出了 timer\_ 中的一个 api `/*manual_start=*/true`
+> 但是实际上并没有这个，但是如果要是是对 timer 使用 lifecycle 倒确实可以增加这个 api
+> 可能实际上并不用，但是这个思路是可以的，直接提供给用户这样的操作
 
 ```cpp
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
@@ -1157,7 +1149,9 @@ private:
 
 在这个示例中，我们在构造函数中创建了一个定时器，但未启动它(通过将 `manual_start` 参数设置为 `true`)。然后，我们覆盖了 `on_activate` 和 `on_deactivate` 生命周期回调方法，以分别启动和停止定时器。
 
-对于服务和客户端，您需要使用 `rclcpp_lifecycle::LifecycleNode::create_service` 和 `rclcpp_lifecycle::LifecycleNode::create_client` 方法。下面是一个使用生命周期服务和生命周期客户端的示例：
+---
+
+对于服务**和客户端**，您需要使用 `rclcpp_lifecycle::LifecycleNode::create_service` 和 `rclcpp_lifecycle::LifecycleNode::create_client` 方法。下面是一个使用生命周期服务和生命周期客户端的示例：
 
 ```cpp
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
@@ -1197,7 +1191,10 @@ private:
 };
 ```
 
-在这个示例中，我们在构造函数中创建了一个生命周期服务和一个生命周期客户端。请注意，生命周期服务和生命周期客户端会在节点激活和停用时自动启用和禁用。因此，您不需要在 `on_activate` 和 `on_deactivate` 生命周期回调方法中显式启用和禁用它们。
+在这个示例中，我们在构造函数中创建了一个生命周期服务和一个生命周期客户端。请注意，**生命周期服务和生命周期客户端会在节点激活和停用时自动启用和禁用**。因此，您不需要在 `on_activate` 和 `on_deactivate` 生命周期回调方法中显式启用和禁用它们。
+
+> [!NOTE]
+> 虽然仅供参考，但是不清楚是为什么？
 
 请注意，为了使此示例正常工作，您需要在 `CMakeLists.txt` 文件中链接相应的服务包(在本例中为 `example_interfaces`)并将其包含在包的依赖关系中。
 
@@ -1262,7 +1259,7 @@ private:
 
 ## 如何在自定义生命周期节点类中进行清理？
 
-在自定义生命周期节点类中进行清理，您需要覆盖 `on_cleanup()` 生命周期回调方法。在此方法中，您可以释放资源、停止定时器、关闭服务等。下面是一个在生命周期节点中进行清理的示例：
+在自定义生命周期节点类中进行清理，您需要**覆盖 `on_cleanup()` 生命周期回调方法。在此方法中，您可以释放资源、停止定时器、关闭服务等**。下面是一个在生命周期节点中进行清理的示例：
 
 ```cpp
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
